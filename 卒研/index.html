@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>VR 背景画像の例</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <!-- 360度画像を背景に設定 -->
+      <a-sky src="back.png" rotation="0 -90 0"></a-sky>
+
+      <!-- カメラとカーソル -->
+      <a-entity camera look-controls wasd-controls>
+        <a-cursor></a-cursor>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
