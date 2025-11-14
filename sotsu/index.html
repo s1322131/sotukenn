@@ -15,30 +15,32 @@
         <a-cursor></a-cursor>
       </a-entity>
 
-      <!-- 右手（コントローラー or 手） -->
+      <!-- 右手（コントローラー→杖に置き換え） -->
       <a-entity id="rightHand"
-                hand-tracking-controls="hand: right"
-                oculus-touch-controls="hand: right"
-                vive-controls="hand: right"
-                windows-motion-controls="hand: right"
-                daydream-controls="hand: right"
-                gearvr-controls="hand: right">
+                oculus-touch-controls="hand: right; model: false"
+                vive-controls="hand: right; model: false"
+                windows-motion-controls="hand: right; model: false"
+                daydream-controls="hand: right; model: false"
+                gearvr-controls="hand: right; model: false"
+                hand-tracking-controls="hand: right">
 
-        <!-- 杖モデル（シンプルな例として円柱） -->
-        <a-cylinder color="#552200" height="1" radius="0.02"
-                    position="0 -0.5 0.1"
+        <!-- 杖モデル -->
+        <a-cylinder color="#552200"
+                    height="1"
+                    radius="0.02"
+                    position="0 -0.5 0.05"
                     rotation="90 0 0">
         </a-cylinder>
       </a-entity>
 
-      <!-- 左手 -->
+      <!-- 左手（通常） -->
       <a-entity id="leftHand"
-                hand-tracking-controls="hand: left"
                 oculus-touch-controls="hand: left"
                 vive-controls="hand: left"
                 windows-motion-controls="hand: left"
                 daydream-controls="hand: left"
-                gearvr-controls="hand: left">
+                gearvr-controls="hand: left"
+                hand-tracking-controls="hand: left">
       </a-entity>
 
       <!-- 環境光 -->
