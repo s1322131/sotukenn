@@ -2,34 +2,34 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <title>VR 背景画像＋コントローラー杖＋手トラッキング＋先生画像</title>
+    <title>VR 背景画像＋先生モデル配置</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   </head>
   <body>
     <a-scene vr-mode-ui="enabled: true">
 
       <!-- ■ 背景360度画像 -->
-      <a-sky src="back.png" rotation="0 0 0"></a-sky>
+      <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
-      <!-- ■ カメラ -->
-      <a-entity id="cameraRig">
-        <a-entity camera look-controls position="0 -3 0"></a-entity>
+      <!-- ■ カメラ（視点） -->
+      <a-entity camera look-controls position="0 -3 0"></a-entity>
+
+
+      <!-- ===================================== -->
+      <!-- ◇ 正面に先生モデルを表示（GLB） -->
+      <!-- ===================================== -->
+      <a-entity id="teacher"
+        gltf-model="teacher1.glb"
+        position="0 -3 -3"
+        rotation="0 180 0"
+        scale="1 1 1">
       </a-entity>
 
 
-      <!-- ★ 正面に先生モデルを表示（GLB） -->
-      <a-entity gltf-model="teacher1.glb"
-            position="0 -3 -3"
-            rotation="0 180 0"
-            scale="1 1 1">
-      </a-entity>
 
-
-
-
-      <!-- =============================== -->
+      <!-- ===================================== -->
       <!-- 右手：コントローラー（杖） -->
-      <!-- =============================== -->
+      <!-- ===================================== -->
       <a-entity id="rightController"
         oculus-touch-controls="hand: right; model: false"
         vive-controls="hand: right"
@@ -37,7 +37,7 @@
         daydream-controls="hand: right"
         gearvr-controls="hand: right">
 
-        <!-- 杖モデル -->
+        <!-- 杖 -->
         <a-entity gltf-model="tsue2.glb"
             scale="0.2 0.2 0.2"
             position="0 0 0"
@@ -47,17 +47,17 @@
       </a-entity>
 
 
-      <!-- =============================== -->
-      <!-- 右手：ハンドトラッキング（杖なし） -->
-      <!-- =============================== -->
+      <!-- ===================================== -->
+      <!-- 右手：ハンドトラッキング -->
+      <!-- ===================================== -->
       <a-entity id="rightHandTracking"
         hand-tracking-controls="hand: right">
       </a-entity>
 
 
-      <!-- =============================== -->
-      <!-- 左手：そのまま -->
-      <!-- =============================== -->
+      <!-- ===================================== -->
+      <!-- 左手：コントローラー＋ハンドトラッキング -->
+      <!-- ===================================== -->
       <a-entity id="leftHand"
         oculus-touch-controls="hand: left"
         vive-controls="hand: left"
@@ -75,6 +75,3 @@
     </a-scene>
   </body>
 </html>
-
-
-
