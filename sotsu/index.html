@@ -17,16 +17,13 @@
       </a-entity>
 
 
-      <!-- =============================== -->
-      <!-- ★ 正面に先生画像を表示（平面） -->
-      <!-- =============================== -->
-      <!-- 画像ファイル名を yourSensei.png にしておく例 -->
-      <!-- カメラの前 3m / 高さ少し上 に配置 -->
-      <a-image src="teacher1.glb"
-               position="0 -2 -3"
-               width="2"
-               height="3">
-      </a-image>
+      <!-- ★ 正面に先生モデルを表示（GLB） -->
+      <a-entity gltf-model="teacher1.glb"
+            position="0 -3 -3"
+            rotation="0 180 0"
+            scale="1 1 1">
+      </a-entity>
+
 
 
 
@@ -78,3 +75,4 @@
     </a-scene>
   </body>
 </html>
+
