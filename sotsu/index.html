@@ -6,30 +6,27 @@
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   </head>
   <body>
-    <a-scene vr-mode-ui="enabled: true">
+    <a-scene vr-mode-ui="enabled: true" lumos-control>
 
       <!-- ■ 背景360度画像 -->
       <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
       <!-- ■ カメラ（視点） -->
-      <a-entity camera look-controls position="0 -3 0"></a-entity>
+      <a-entity camera look-controls position="0 0 0"></a-entity>
 
 
-      <!-- ===================================== -->
-      <!-- ◇ 正面に先生モデルを表示（GLB） -->
-      <!-- ===================================== -->
+      <!-- ◇ 先生モデル -->
       <a-entity id="teacher"
         gltf-model="teacher1.glb"
-        position="0 -20-10"
+        position="0 -20 -10"
         rotation="90 70 0"
         scale="14 14 14">
       </a-entity>
 
+      <!-- 別モデル（例） -->
       <a-entity gltf-model="https://drive.google.com/uc?export=download&id=1OCdmLq3GVszTa0f5S5DMlGM6QOEYYaVk"
           position="0 0 -50">
       </a-entity>
-
-
 
 
       <!-- ===================================== -->
@@ -42,27 +39,31 @@
         daydream-controls="hand: right"
         gearvr-controls="hand: right">
 
-        <!-- 杖 -->
-        <a-entity gltf-model="tsue2.glb"
-            scale="0.2 0.2 0.2"
-            position="0 0 0"
-            rotation="70 0 0">
+        <!-- 杖モデル -->
+        <a-entity id="wand"
+          gltf-model="tsue2.glb"
+          scale="0.2 0.2 0.2"
+          position="0 0 0"
+          rotation="70 0 0">
+
+          <!-- 杖の先の光（最初はOFF） -->
+          <a-entity id="wandLight"
+            light="type: point; intensity: 0; distance: 5"
+            position="0 0.5 0">
+          </a-entity>
+
         </a-entity>
 
       </a-entity>
 
 
-      <!-- ===================================== -->
-      <!-- 右手：ハンドトラッキング -->
-      <!-- ===================================== -->
+      <!-- 右手ハンドトラッキング対応 -->
       <a-entity id="rightHandTracking"
         hand-tracking-controls="hand: right">
       </a-entity>
 
 
-      <!-- ===================================== -->
-      <!-- 左手：コントローラー＋ハンドトラッキング -->
-      <!-- ===================================== -->
+      <!-- 左手 -->
       <a-entity id="leftHand"
         oculus-touch-controls="hand: left"
         vive-controls="hand: left"
@@ -73,26 +74,31 @@
       </a-entity>
 
 
-      <!-- ■ 照明 -->
+      <!-- ● 照明 -->
       <a-entity light="type: ambient; intensity: 0.8"></a-entity>
       <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
 
     </a-scene>
+
+    <!-- ===================================== -->
+    <!-- 🪄 ルーモス制御スクリプト -->
+    <!-- ===================================== -->
+    <script>
+      AFRAME.registerComponent('lumos-control', {
+        init: function () {
+          const controller = document.querySelector('#rightController');
+          const wandLight = document.querySelector('#wandLight');
+          let isOn = false;
+
+          // 人差し指のトリガーで光 ON/OFF
+          controller.addEventListener('triggerdown', () => {
+            isOn = !isOn;
+            wandLight.setAttribute('light', 'intensity', isOn ? 2 : 0);
+            console.log(isOn ? "LUMOS!" : "NOX!");
+          });
+        }
+      });
+    </script>
+
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
