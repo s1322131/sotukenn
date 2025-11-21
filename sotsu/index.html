@@ -83,82 +83,62 @@
     <!-- ===================================== -->
     <!-- 🪄 ルーモス制御スクリプト -->
     <!-- ===================================== -->
-      <script>
-      AFRAME.registerComponent('lumos-control', {
-      init: function () {
-        const controller = document.querySelector('#rightController');
-        const wandTip = document.querySelector('#wandLight'); // 杖の先
-        let isOn = false;
-        let currentOrb = null;
-  
-        controller.addEventListener('triggerdown', () => {
-          if (!isOn) {
-            // LUMOS（ほわわわ〜ん）
-            isOn = true;
-            createMagicOrb();
-          } else {
-            // NOX（消える）
-            isOn = false;
-            if (currentOrb) {
-              currentOrb.setAttribute('animation__fade', {
-                property: 'material.opacity',
-                to: 0,
-                dur: 800,
-                easing: "easeOutQuad"
-              });
-              setTimeout(() => currentOrb.remove(), 850);
-            }
-          }
-        });
-  
-        function createMagicOrb() {
-          currentOrb = document.createElement('a-entity');
-  
-          // 光る玉
-          currentOrb.setAttribute('geometry', 'primitive: sphere; radius: 0.01');
-          currentOrb.setAttribute(
-            'material',
-            'color: #ffffff; emissive: #aaffff; emissiveIntensity: 2; opacity: 0.9'
-          );
-          currentOrb.setAttribute(
-            'light',
-            'type: point; intensity: 3; distance: 5'
-          );
-  
-          // 杖先の位置にスポーン
-          const pos = new THREE.Vector3();
-          wandTip.object3D.getWorldPosition(pos);
-          currentOrb.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
-  
-          // 膨らむアニメーション
-          currentOrb.setAttribute('animation__grow', {
-            property: 'scale',
-            to: '0.6 0.6 0.6',
-            dur: 1500,
-            easing: "easeOutElastic"
+     <script>
+  AFRAME.registerComponent('lumos-control', {
+    init: function () {
+      const controller = document.querySelector('#rightController');
+      const wandLight = document.querySelector('#wandLight');
+      let isOn = false;
+
+      controller.addEventListener('triggerdown', () => {
+        isOn = !isOn;
+
+        if (isOn) {
+          // LUMOS! 光がふわ〜っと強くなる✨
+          wandLight.setAttribute('light', {
+            type: 'point',
+            intensity: 4,
+            distance: 8
           });
-  
-          // ほんの少し揺れる
-          currentOrb.setAttribute('animation__pulse', {
-            property: 'scale',
-            dir: 'alternate',
-            dur: 1500,
-            loop: true,
-            easing: "easeInOutSine",
-            to: '0.7 0.7 0.7'
+
+          // 明るさが膨らむアニメーション
+          wandLight.setAttribute('animation__glow', {
+            property: 'light.intensity',
+            from: 0,
+            to: 4,
+            dur: 800,
+            easing: "easeOutQuad"
           });
-  
-          document.querySelector('a-scene').appendChild(currentOrb);
+
+          console.log("LUMOS!");
+        } else {
+          // NOX! 光がスーッと消える✨
+          wandLight.setAttribute('animation__fade', {
+            property: 'light.intensity',
+            from: 4,
+            to: 0,
+            dur: 600,
+            easing: "easeOutQuad"
+          });
+
+          setTimeout(() => {
+            wandLight.setAttribute('light', 'intensity', 0);
+          }, 650);
+
+          console.log("NOX!");
         }
-      }
-    });
-  </script>
+      });
+    }
+  });
+</script>
+
 
 
 
 
   </body>
 </html>
+
 
 
 
