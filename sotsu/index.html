@@ -8,20 +8,16 @@
   <body>
     <a-scene vr-mode-ui="enabled: true" lumos-control>
 
-      <!-- ■ 背景360度画像 -->
       <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
-      <!-- ■ カメラ（視点） -->
       <a-entity camera look-controls position="0 -3 0"></a-entity>
 
-      <!-- ◇ 羽モデル -->
       <a-entity gltf-model="hane.glb"
         position="0 1.5 -3"
         rotation="0 90 0"
         scale="0.3 0.3 0.3">
       </a-entity>
 
-      <!-- ◇ 先生モデル -->
       <a-entity id="teacher"
         gltf-model="teacher.glb"
         position="0 -20 -10"
@@ -29,15 +25,11 @@
         scale="14 14 14">
       </a-entity>
 
-      <!-- 別モデル例 -->
       <a-entity gltf-model="https://drive.google.com/uc?export=download&id=1OCdmLq3GVszTa0f5S5DMlGM6QOEYYaVk"
           position="0 0 -50">
       </a-entity>
 
-
-      <!-- ===================================== -->
-      <!-- 右手：コントローラー（杖） -->
-      <!-- ===================================== -->
+      <!-- 右手コントローラー（杖） -->
       <a-entity id="rightController"
         oculus-touch-controls="hand: right; model: false"
         vive-controls="hand: right"
@@ -52,26 +44,21 @@
           position="0 0 0"
           rotation="70 0 0">
 
-          <!-- ⭐ 杖の先端だけ光る球体（ライトなし） -->
+          <!-- ⭐ 杖の先端光（最初は完全透明） -->
           <a-sphere id="wandGlow"
             radius="0.05"
             color="#ffffff"
             emissive="#ffffff"
             emissiveIntensity="0"
-            position="0 0.8 0">
+            position="0 0.15 0"
+            material="opacity: 0; transparent: true">
           </a-sphere>
 
         </a-entity>
-
       </a-entity>
 
+      <a-entity id="rightHandTracking" hand-tracking-controls="hand: right"></a-entity>
 
-      <!-- 右手ハンドトラッキング対応 -->
-      <a-entity id="rightHandTracking"
-        hand-tracking-controls="hand: right">
-      </a-entity>
-
-      <!-- 左手 -->
       <a-entity id="leftHand"
         oculus-touch-controls="hand: left"
         vive-controls="hand: left"
@@ -81,16 +68,12 @@
         hand-tracking-controls="hand: left">
       </a-entity>
 
-
-      <!-- ● 照明（背景用） -->
       <a-entity light="type: ambient; intensity: 0.8"></a-entity>
       <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
 
     </a-scene>
 
-    <!-- ===================================== -->
-    <!-- 🪄 ルーモス制御スクリプト（emissiveで発光） -->
-    <!-- ===================================== -->
+    <!-- ルーモス制御スクリプト -->
     <script>
       AFRAME.registerComponent('lumos-control', {
         init: function () {
@@ -102,7 +85,8 @@
             isOn = !isOn;
 
             if (isOn) {
-              // ふわっと光る
+              // 透明→光る
+              glow.setAttribute('material', 'opacity', 1);
               glow.setAttribute('animation__glow', {
                 property: 'material.emissiveIntensity',
                 from: 0,
@@ -111,7 +95,7 @@
                 easing: "easeOutQuad"
               });
             } else {
-              // スーッと消える
+              // 光が消える→透明に戻る
               glow.setAttribute('animation__fade', {
                 property: 'material.emissiveIntensity',
                 from: 3,
@@ -119,6 +103,10 @@
                 dur: 500,
                 easing: "easeOutQuad"
               });
+
+              setTimeout(() => {
+                glow.setAttribute('material', 'opacity', 0);
+              }, 520);
             }
           });
         }
