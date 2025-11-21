@@ -84,22 +84,52 @@
     <!-- 🪄 ルーモス制御スクリプト -->
     <!-- ===================================== -->
     <script>
-      AFRAME.registerComponent('lumos-control', {
-        init: function () {
-          const controller = document.querySelector('#rightController');
-          const wandLight = document.querySelector('#wandLight');
-          let isOn = false;
+    AFRAME.registerComponent('lumos-control', {
+      init: function () {
+        const controller = document.querySelector('#rightController');
+        const wand = document.querySelector('#wand');
+  
+        let canShoot = true; // 連打防止
+  
+        controller.addEventListener('triggerdown', () => {
+          if (!canShoot) return;
+          canShoot = false;
+          setTimeout(() => (canShoot = true), 500);
+  
+          // 光の玉を生成
+          const orb = document.createElement('a-entity');
+          orb.setAttribute('geometry', 'primitive: sphere; radius: 0.1');
+          orb.setAttribute('material', 'color: #ffffff; emissive: #ffffff; emissiveIntensity: 1');
+          orb.setAttribute('light', 'type: point; intensity: 3; distance: 6');
+  
+          // 杖の先の位置を取得
+          const wandTip = document.querySelector('#wandLight');
+          const wandTipPos = new THREE.Vector3();
+          wandTip.object3D.getWorldPosition(wandTipPos);
+  
+          orb.setAttribute('position', `${wandTipPos.x} ${wandTipPos.y} ${wandTipPos.z}`);
+  
+          // 前方向へ発射
+          const forward = new THREE.Vector3();
+          wand.object3D.getWorldDirection(forward);
+  
+          const velocity = forward.multiplyScalar(-3); // 杖モデルが逆方向なので -3
+          orb.setAttribute('velocity', `${velocity.x} ${velocity.y} ${velocity.z}`);
+  
+          // 一定時間後に削除
+          setTimeout(() => {
+            orb.parentNode && orb.parentNode.removeChild(orb);
+          }, 4000);
+  
+          // シーンに追加
+          document.querySelector('a-scene').appendChild(orb);
+        });
+      }
+    });
+  </script>
 
-          // 人差し指のトリガーで光 ON/OFF
-          controller.addEventListener('triggerdown', () => {
-            isOn = !isOn;
-            wandLight.setAttribute('light', 'intensity', isOn ? 2 : 0);
-            console.log(isOn ? "LUMOS!" : "NOX!");
-          });
-        }
-      });
-    </script>
 
   </body>
 </html>
+
 
