@@ -83,54 +83,83 @@
     <!-- ===================================== -->
     <!-- 🪄 ルーモス制御スクリプト -->
     <!-- ===================================== -->
-     <script>
-    AFRAME.registerComponent('lumos-control', {
+      <script>
+      AFRAME.registerComponent('lumos-control', {
       init: function () {
         const controller = document.querySelector('#rightController');
-        const wandTip = document.querySelector('#wandLight'); // 杖先
-        let canShoot = true;
+        const wandTip = document.querySelector('#wandLight'); // 杖の先
+        let isOn = false;
+        let currentOrb = null;
   
         controller.addEventListener('triggerdown', () => {
-          if (!canShoot) return;
-          canShoot = false;
-          setTimeout(() => (canShoot = true), 500);
+          if (!isOn) {
+            // LUMOS（ほわわわ〜ん）
+            isOn = true;
+            createMagicOrb();
+          } else {
+            // NOX（消える）
+            isOn = false;
+            if (currentOrb) {
+              currentOrb.setAttribute('animation__fade', {
+                property: 'material.opacity',
+                to: 0,
+                dur: 800,
+                easing: "easeOutQuad"
+              });
+              setTimeout(() => currentOrb.remove(), 850);
+            }
+          }
+        });
   
-          // 光の玉
-          const orb = document.createElement('a-entity');
-          orb.setAttribute('geometry', 'primitive: sphere; radius: 0.1');
-          orb.setAttribute('material', 'color: #ffffff; emissive: #ffffff; emissiveIntensity: 1');
-          orb.setAttribute('light', 'type: point; intensity: 3; distance: 6');
+        function createMagicOrb() {
+          currentOrb = document.createElement('a-entity');
   
-          // 杖先の世界座標を取得
+          // 光る玉
+          currentOrb.setAttribute('geometry', 'primitive: sphere; radius: 0.01');
+          currentOrb.setAttribute(
+            'material',
+            'color: #ffffff; emissive: #aaffff; emissiveIntensity: 2; opacity: 0.9'
+          );
+          currentOrb.setAttribute(
+            'light',
+            'type: point; intensity: 3; distance: 5'
+          );
+  
+          // 杖先の位置にスポーン
           const pos = new THREE.Vector3();
           wandTip.object3D.getWorldPosition(pos);
-          orb.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+          currentOrb.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
   
-          // 杖先の向いている方向に飛ばす
-          const direction = new THREE.Vector3();
-          wandTip.object3D.getWorldDirection(direction);
+          // 膨らむアニメーション
+          currentOrb.setAttribute('animation__grow', {
+            property: 'scale',
+            to: '0.6 0.6 0.6',
+            dur: 1500,
+            easing: "easeOutElastic"
+          });
   
-          // 奥へ向かうよう調整
-          const speed = 4;
-          const velocity = direction.multiplyScalar(-speed);
-          orb.setAttribute('velocity', `${velocity.x} ${velocity.y} ${velocity.z}`);
+          // ほんの少し揺れる
+          currentOrb.setAttribute('animation__pulse', {
+            property: 'scale',
+            dir: 'alternate',
+            dur: 1500,
+            loop: true,
+            easing: "easeInOutSine",
+            to: '0.7 0.7 0.7'
+          });
   
-          // シーンに追加
-          document.querySelector('a-scene').appendChild(orb);
-  
-          // 自然に消える
-          setTimeout(() => {
-            orb.parentNode && orb.parentNode.removeChild(orb);
-          }, 5000);
-        });
+          document.querySelector('a-scene').appendChild(currentOrb);
+        }
       }
     });
   </script>
 
 
 
+
   </body>
 </html>
+
 
 
 
