@@ -76,43 +76,69 @@
     <!-- ルーモス制御スクリプト -->
     <script>
       AFRAME.registerComponent('lumos-control', {
-        init: function () {
-          const controller = document.querySelector('#rightController');
-          const glow = document.querySelector('#wandGlow');
-          let isOn = false;
+  init: function () {
+    const controller = document.querySelector('#rightController');
+    const glow = document.querySelector('#wandGlow');
+    let isOn = false;
 
-          controller.addEventListener('triggerdown', () => {
-            isOn = !isOn;
+    controller.addEventListener('triggerdown', () => {
+      isOn = !isOn;
 
-            if (isOn) {
-              // 透明→光る
-              glow.setAttribute('material', 'opacity', 1);
-              glow.setAttribute('animation__glow', {
-                property: 'material.emissiveIntensity',
-                from: 0,
-                to: 3,
-                dur: 600,
-                easing: "easeOutQuad"
-              });
-            } else {
-              // 光が消える→透明に戻る
-              glow.setAttribute('animation__fade', {
-                property: 'material.emissiveIntensity',
-                from: 3,
-                to: 0,
-                dur: 500,
-                easing: "easeOutQuad"
-              });
+      if (isOn) {
+        // -------------------------------
+        // ① まず形がふわっと現れる
+        // -------------------------------
+        glow.setAttribute('animation__appear', {
+          property: 'material.opacity',
+          from: 0,
+          to: 0.8,
+          dur: 900,
+          easing: "easeOutQuad"
+        });
 
-              setTimeout(() => {
-                glow.setAttribute('material', 'opacity', 0);
-              }, 520);
-            }
-          });
-        }
-      });
+        // -------------------------------
+        // ② そのあと光がふくらむ
+        // -------------------------------
+        glow.setAttribute('animation__glow', {
+          property: 'material.emissiveIntensity',
+          from: 0,
+          to: 4,
+          dur: 1500,
+          delay: 200,   // 少し遅れて膨らみ始める
+          easing: "easeOutExpo"
+        });
+
+      } else {
+        // -------------------------------
+        // ③ 光がゆっくり消える
+        // -------------------------------
+        glow.setAttribute('animation__fadeglow', {
+          property: 'material.emissiveIntensity',
+          from: 4,
+          to: 0,
+          dur: 900,
+          easing: "easeOutQuad"
+        });
+
+        // -------------------------------
+        // ④ 形も消える
+        // -------------------------------
+        glow.setAttribute('animation__fadeout', {
+          property: 'material.opacity',
+          from: 0.8,
+          to: 0,
+          dur: 600,
+          delay: 300,
+          easing: "easeOutQuad"
+        });
+      }
+    });
+  }
+});
+
     </script>
 
   </body>
 </html>
+
 
