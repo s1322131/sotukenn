@@ -55,7 +55,7 @@
           <!-- 杖の先の光（最初はOFF） -->
           <a-entity id="wandLight"
             light="type: point; intensity: 0; distance: 5"
-            position="0 0.5 0">
+            position="0 0.8 0">
           </a-entity>
 
         </a-entity>
@@ -90,53 +90,53 @@
     <!-- 🪄 ルーモス制御スクリプト -->
     <!-- ===================================== -->
      <script>
-  AFRAME.registerComponent('lumos-control', {
-    init: function () {
-      const controller = document.querySelector('#rightController');
-      const wandLight = document.querySelector('#wandLight');
-      let isOn = false;
-
-      controller.addEventListener('triggerdown', () => {
-        isOn = !isOn;
-
-        if (isOn) {
-          // LUMOS! 光がふわ〜っと強くなる✨
-          wandLight.setAttribute('light', {
-            type: 'point',
-            intensity: 4,
-            distance: 8
+      AFRAME.registerComponent('lumos-control', {
+        init: function () {
+          const controller = document.querySelector('#rightController');
+          const wandLight = document.querySelector('#wandLight');
+          let isOn = false;
+    
+          controller.addEventListener('triggerdown', () => {
+            isOn = !isOn;
+    
+            if (isOn) {
+              // LUMOS! 光がふわ〜っと強くなる✨
+              wandLight.setAttribute('light', {
+                type: 'point',
+                intensity: 4,
+                distance: 8
+              });
+    
+              // 明るさが膨らむアニメーション
+              wandLight.setAttribute('animation__glow', {
+                property: 'light.intensity',
+                from: 0,
+                to: 4,
+                dur: 800,
+                easing: "easeOutQuad"
+              });
+    
+              console.log("LUMOS!");
+            } else {
+              // NOX! 光がスーッと消える✨
+              wandLight.setAttribute('animation__fade', {
+                property: 'light.intensity',
+                from: 4,
+                to: 0,
+                dur: 600,
+                easing: "easeOutQuad"
+              });
+    
+              setTimeout(() => {
+                wandLight.setAttribute('light', 'intensity', 0);
+              }, 650);
+    
+              console.log("NOX!");
+            }
           });
-
-          // 明るさが膨らむアニメーション
-          wandLight.setAttribute('animation__glow', {
-            property: 'light.intensity',
-            from: 0,
-            to: 4,
-            dur: 800,
-            easing: "easeOutQuad"
-          });
-
-          console.log("LUMOS!");
-        } else {
-          // NOX! 光がスーッと消える✨
-          wandLight.setAttribute('animation__fade', {
-            property: 'light.intensity',
-            from: 4,
-            to: 0,
-            dur: 600,
-            easing: "easeOutQuad"
-          });
-
-          setTimeout(() => {
-            wandLight.setAttribute('light', 'intensity', 0);
-          }, 650);
-
-          console.log("NOX!");
         }
       });
-    }
-  });
-</script>
+  </script>
 
 
 
@@ -144,6 +144,7 @@
 
   </body>
 </html>
+
 
 
 
