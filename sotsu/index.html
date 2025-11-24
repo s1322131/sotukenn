@@ -2,125 +2,174 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <title>VR Magic Wand</title>
+    <title>VR 背景画像＋先生モデル配置</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   </head>
   <body>
-    <a-scene vr-mode-ui="enabled: true">
+    <a-scene vr-mode-ui="enabled: true" lumos-control>
 
-      <!-- 光線テクスチャ（必要なら差し替え） -->
-      <a-assets>
-        <img id="sparkTexture" src="/mnt/data/unnamed.jpg" />
-      </a-assets>
+      <!-- 背景360度 -->
+      <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
-      <!-- コントローラー -->
-      <a-entity id="rightController" laser-controls="hand: right"></a-entity>
+      <!-- カメラ -->
+      <a-entity camera look-controls position="0 -3 0"></a-entity>
 
-      <!-- 杖の先端（光エフェクトまとめ） -->
-      <a-entity id="wandTip" position="0 1.2 -0.5">
-
-        <!-- コア（強い白光） -->
-        <a-sphere id="coreGlow"
-          radius="0.015"
-          material="color: white; emissive: white; emissiveIntensity: 4; opacity: 0; transparent: true">
-        </a-sphere>
-
-        <!-- 外光（青い光） -->
-        <a-sphere id="outerGlow"
-          radius="0.12"
-          material="color: #66aaff; emissive: #66aaff; emissiveIntensity: 1.5; opacity: 0; transparent: true">
-        </a-sphere>
-
-        <!-- スパーク（光線） -->
-        <a-plane id="sparkGlow"
-          src="#sparkTexture"
-          width="0.45" height="0.45"
-          material="opacity: 0; transparent: true; emissive: white"
-          look-at="[camera]">
-        </a-plane>
-
-        <!-- 周囲を照らすライト -->
-        <a-entity id="wandLight"
-          light="type: point; intensity: 0; distance: 3; decay: 2">
-        </a-entity>
-
+      <!-- 羽 -->
+      <a-entity gltf-model="hane.glb"
+        position="0 1.5 -3"
+        rotation="0 90 0"
+        scale="0.3 0.3 0.3">
       </a-entity>
 
-      <!-- 魔法制御スクリプト -->
-      <script>
-        AFRAME.registerComponent('lumos-control', {
-          init: function () {
-            const c = document.querySelector('#rightController');
-            const core = document.querySelector('#coreGlow');
-            const outer = document.querySelector('#outerGlow');
-            const spark = document.querySelector('#sparkGlow');
-            const light = document.querySelector('#wandLight');
+      <!-- 先生モデル -->
+      <a-entity id="teacher"
+        gltf-model="teacher.glb"
+        position="0 -20 -10"
+        rotation="90 70 0"
+        scale="14 14 14">
+      </a-entity>
 
-            let on = false;
+      <!-- 別モデル（例） -->
+      <a-entity gltf-model="https://drive.google.com/uc?export=download&id=1OCdmLq3GVszTa0f5S5DMlGM6QOEYYaVk"
+        position="0 0 -50">
+      </a-entity>
 
-            c.addEventListener('triggerdown', () => {
-              on = !on;
 
-              if (on) {
-                core.setAttribute('animation__core', {
-                  property: "material.opacity",
-                  from: 0, to: 1,
-                  dur: 500, easing: "easeOutQuad"
-                });
+      <!-- ================================ -->
+      <!-- コントローラー（右手） -->
+      <!-- ================================ -->
+      <a-entity id="rightController"
+        oculus-touch-controls="hand: right; model: false"
+        vive-controls="hand: right"
+        windows-motion-controls="hand: right"
+        daydream-controls="hand: right"
+        gearvr-controls="hand: right">
 
-                outer.setAttribute('animation__outer', {
-                  property: "material.opacity",
-                  from: 0, to: 0.7,
-                  dur: 1200, delay: 150,
-                  easing: "easeOutQuad"
-                });
+        <!-- 杖モデル -->
+        <a-entity id="wand"
+          gltf-model="tsue2.glb"
+          scale="0.2 0.2 0.2"
+          position="0 0 0"
+          rotation="70 0 0">
 
-                spark.setAttribute('animation__spark', {
-                  property: "material.opacity",
-                  from: 0, to: 0.9,
-                  dur: 900, delay: 300,
-                  easing: "easeOutQuad"
-                });
+          <!-- ◆ 杖の先の光（見た目の光） -->
+          <a-sphere id="wandGlow"
+            radius="0.05"
+            color="#ffffff"
+            emissive="#ffffff"
+            emissiveIntensity="0"
+            position="0 0.15 0"
+            material="opacity: 0; transparent: true">
+          </a-sphere>
 
-                light.setAttribute('animation__light', {
-                  property: "light.intensity",
-                  from: 0, to: 1.6,
-                  dur: 1200,
-                  easing: "easeOutQuad"
-                });
+          <!-- ◆ 周りをほんのり照らすライト -->
+          <a-entity id="wandRealLight"
+            light="type: point; intensity: 0; distance: 3; decay: 2"
+            position="0 0.15 0">
+          </a-entity>
 
-              } else {
-                core.setAttribute('animation__coreoff', {
-                  property: "material.opacity",
-                  from: 1, to: 0,
-                  dur: 600
-                });
+        </a-entity>
+      </a-entity>
 
-                outer.setAttribute('animation__outeroff', {
-                  property: "material.opacity",
-                  from: 0.7, to: 0,
-                  dur: 700
-                });
+      <!-- ハンドトラッキング -->
+      <a-entity id="rightHandTracking" hand-tracking-controls="hand: right"></a-entity>
 
-                spark.setAttribute('animation__sparkoff', {
-                  property: "material.opacity",
-                  from: 0.9, to: 0,
-                  dur: 700
-                });
+      <!-- 左手 -->
+      <a-entity id="leftHand"
+        oculus-touch-controls="hand: left"
+        vive-controls="hand: left"
+        windows-motion-controls="hand: left"
+        daydream-controls="hand: left"
+        gearvr-controls="hand: left"
+        hand-tracking-controls="hand: left">
+      </a-entity>
 
-                light.setAttribute('animation__lightoff', {
-                  property: "light.intensity",
-                  from: 1.6, to: 0,
-                  dur: 800
-                });
-              }
-            });
-          }
-        });
-      </script>
-
-      <a-entity lumos-control></a-entity>
+      <!-- 照明 -->
+      <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+      <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
 
     </a-scene>
+
+    <!-- ================================ -->
+    <!-- ルーモス制御スクリプト -->
+    <!-- ================================ -->
+    <script>
+      AFRAME.registerComponent('lumos-control', {
+        init: function () {
+          const controller = document.querySelector('#rightController');
+          const glow = document.querySelector('#wandGlow');
+          const realLight = document.querySelector('#wandRealLight');
+
+          let isOn = false;
+
+          controller.addEventListener('triggerdown', () => {
+            isOn = !isOn;
+
+            if (isOn) {
+
+              // ① 光の形がふわっと浮かぶ
+              glow.setAttribute('animation__appear', {
+                property: 'material.opacity',
+                from: 0,
+                to: 0.8,
+                dur: 900,
+                easing: "easeOutQuad"
+              });
+
+              // ② 発光がふわ〜っと膨らむ
+              glow.setAttribute('animation__glow', {
+                property: 'material.emissiveIntensity',
+                from: 0,
+                to: 4,
+                dur: 1500,
+                delay: 200,
+                easing: "easeOutExpo"
+              });
+
+              // ③ 周囲を照らすライトもじわっと点灯
+              realLight.setAttribute('animation__lighton', {
+                property: 'light.intensity',
+                from: 0,
+                to: 1.5,
+                dur: 1200,
+                delay: 300,
+                easing: "easeOutQuad"
+              });
+
+            } else {
+
+              // 発光を消す
+              glow.setAttribute('animation__glowoff', {
+                property: 'material.emissiveIntensity',
+                from: 4,
+                to: 0,
+                dur: 800,
+                easing: "easeOutQuad"
+              });
+
+              // 球体を透明に戻す
+              glow.setAttribute('animation__fadeout', {
+                property: 'material.opacity',
+                from: 0.8,
+                to: 0,
+                dur: 700,
+                delay: 300,
+                easing: "easeOutQuad"
+              });
+
+              // 周囲のライトも消灯
+              realLight.setAttribute('animation__lightoff', {
+                property: 'light.intensity',
+                from: 1.5,
+                to: 0,
+                dur: 900,
+                easing: "easeOutQuad"
+              });
+            }
+          });
+        }
+      });
+    </script>
+
   </body>
 </html>
