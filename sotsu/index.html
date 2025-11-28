@@ -36,7 +36,8 @@
       
       <!-- コントローラー（右手） -->
       <a-entity id="rightController" 
-        laser-controls="hand: right" raycaster="objects: .grabbable; far: 10" 
+        laser-controls="hand: right" 
+        raycaster="objects: .grabbable; far: 10" 
         oculus-touch-controls="hand: right; model: false" 
         vive-controls="hand: right" 
         windows-motion-controls="hand: right" 
@@ -45,9 +46,9 @@
         
         <!-- 杖（＋魔法光エフェクト） --> 
         <a-entity id="wand" 
-          gltf-model="tsue2.glb" 
-          follow-controller="id: rightController" 
+          gltf-model="tsue2.glb"
           scale="0.2 0.2 0.2" 
+          position="0 0 0"
           rotation="0 0 0"> 
           
           <!-- ◆ 魔法の光（脈動・揺らぎ） --> 
@@ -197,6 +198,7 @@
 
   </body>
 </html>
+
 
 
 
