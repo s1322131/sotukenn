@@ -16,11 +16,13 @@
 
       <!-- 羽（白で表示） -->
       <a-entity gltf-model="hane.glb"
+  class="grabbable"
   grab-object
   position="0 1 -3"
   rotation="0 90 0"
   scale="0.3 0.3 0.3">
 </a-entity>
+
 
       <!-- 先生モデル（アニメーション付き） -->
       <a-entity id="teacher"
@@ -36,11 +38,14 @@
       <!-- コントローラー（右手） -->
       <!-- ================================ -->
       <a-entity id="rightController"
-        oculus-touch-controls="hand: right; model: false"
-        vive-controls="hand: right"
-        windows-motion-controls="hand: right"
-        daydream-controls="hand: right"
-        gearvr-controls="hand: right">
+  laser-controls="hand: right"
+  raycaster="objects: .grabbable; far: 10"
+  oculus-touch-controls="hand: right; model: false"
+  vive-controls="hand: right"
+  windows-motion-controls="hand: right"
+  daydream-controls="hand: right"
+  gearvr-controls="hand: right">
+
 
         <!-- 杖（＋魔法光エフェクト） -->
         <a-entity id="wand"
@@ -177,6 +182,7 @@ AFRAME.registerComponent('grab-object', {
 
   </body>
 </html>
+
 
 
 
