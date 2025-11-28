@@ -86,26 +86,6 @@
 
     </a-scene>
 
-    <script>
-        AFRAME.registerComponent('follow-controller', {
-          schema: { id: {type: 'string'} },
-        
-          init: function () {
-            this.controller = document.querySelector('#' + this.data.id);
-          },
-        
-          tick: function () {
-            if (!this.controller) return;
-        
-            // 位置を同期
-            this.el.object3D.position.copy(this.controller.object3D.position);
-        
-            // 回転を同期
-            this.el.object3D.quaternion.copy(this.controller.object3D.quaternion);
-          }
-        });
-    </script>
-
 
     <script>
       AFRAME.registerComponent('grab-object', {
@@ -198,6 +178,7 @@
 
   </body>
 </html>
+
 
 
 
