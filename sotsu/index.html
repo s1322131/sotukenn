@@ -2,11 +2,11 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <title>VR 背景画像＋先生モデル配置</title>
+    <title>VR 背景画像＋先生モデル＋杖の光</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   </head>
   <body>
-    <a-scene vr-mode-ui="enabled: true" lumos-control>
+    <a-scene vr-mode-ui="enabled: true" wand-light-control>
 
       <!-- 背景360度 -->
       <a-sky src="back.png" rotation="0 -90 0"></a-sky>
@@ -14,11 +14,12 @@
       <!-- カメラ -->
       <a-entity camera look-controls position="0 -3 0"></a-entity>
 
-      <!-- 羽 -->
+      <!-- 羽（白色で表示） -->
       <a-entity gltf-model="hane.glb"
         position="0 1 -3"
         rotation="0 90 0"
-        scale="0.3 0.3 0.3">
+        scale="0.3 0.3 0.3"
+        material="shader: flat; color: white;">
       </a-entity>
 
       <!-- 先生モデル -->
@@ -30,14 +31,13 @@
         scale="14 14 14">
       </a-entity>
 
-      <!-- 別モデル（例） -->
+      <!-- 他のモデル（例） -->
       <a-entity gltf-model="https://drive.google.com/uc?export=download&id=1OCdmLq3GVszTa0f5S5DMlGM6QOEYYaVk"
         position="0 0 -50">
       </a-entity>
 
-
       <!-- ================================ -->
-      <!-- コントローラー（右手） -->
+      <!-- 右手コントローラー -->
       <!-- ================================ -->
       <a-entity id="rightController"
         oculus-touch-controls="hand: right; model: false"
@@ -46,25 +46,25 @@
         daydream-controls="hand: right"
         gearvr-controls="hand: right">
 
-        <!-- 杖モデル -->
+        <!-- ◆ 杖（光の子を持つ） -->
         <a-entity id="wand"
           gltf-model="tsue2.glb"
           scale="0.2 0.2 0.2"
           position="0 0 0"
           rotation="70 0 0">
 
-          <!-- ◆ 杖の先の光（見た目の光） -->
+          <!-- 杖の先の光（最初は消しておく） -->
           <a-sphere id="wandGlow"
             radius="0.05"
             color="#ffffff"
             emissive="#ffffff"
-            emissiveIntensity="0"
-            position="0 0.15 0"
-            material="opacity: 0; transparent: true">
+            emissiveIntensity="1"
+            visible="false"
+            position="0 0.15 0">
           </a-sphere>
 
-          <!-- ◆ 周りをほんのり照らすライト -->
-          <a-entity id="wandRealLight"
+          <!-- 周囲を照らすライト -->
+          <a-entity id="wandLight"
             light="type: point; intensity: 0; distance: 3; decay: 2"
             position="0 0.15 0">
           </a-entity>
@@ -75,7 +75,7 @@
       <!-- ハンドトラッキング -->
       <a-entity id="rightHandTracking" hand-tracking-controls="hand: right"></a-entity>
 
-      <!-- 左手 -->
+      <!-- 左手コントローラー -->
       <a-entity id="leftHand"
         oculus-touch-controls="hand: left"
         vive-controls="hand: left"
@@ -92,14 +92,14 @@
     </a-scene>
 
     <!-- ================================ -->
-    <!-- ルーモス制御スクリプト -->
+    <!-- 杖の光 ON/OFF スクリプト -->
     <!-- ================================ -->
     <script>
-      AFRAME.registerComponent('lumos-control', {
+      AFRAME.registerComponent('wand-light-control', {
         init: function () {
           const controller = document.querySelector('#rightController');
           const glow = document.querySelector('#wandGlow');
-          const realLight = document.querySelector('#wandRealLight');
+          const light = document.querySelector('#wandLight');
 
           let isOn = false;
 
@@ -107,65 +107,11 @@
             isOn = !isOn;
 
             if (isOn) {
-
-              // ① 光の形がふわっと浮かぶ
-              glow.setAttribute('animation__appear', {
-                property: 'material.opacity',
-                from: 0,
-                to: 0.8,
-                dur: 900,
-                easing: "easeOutQuad"
-              });
-
-              // ② 発光がふわ〜っと膨らむ
-              glow.setAttribute('animation__glow', {
-                property: 'material.emissiveIntensity',
-                from: 0,
-                to: 4,
-                dur: 1500,
-                delay: 200,
-                easing: "easeOutExpo"
-              });
-
-              // ③ 周囲を照らすライトもじわっと点灯
-              realLight.setAttribute('animation__lighton', {
-                property: 'light.intensity',
-                from: 0,
-                to: 1.5,
-                dur: 1200,
-                delay: 300,
-                easing: "easeOutQuad"
-              });
-
+              glow.setAttribute('visible', true);
+              light.setAttribute('light', 'intensity', 1.5);
             } else {
-
-              // 発光を消す
-              glow.setAttribute('animation__glowoff', {
-                property: 'material.emissiveIntensity',
-                from: 4,
-                to: 0,
-                dur: 800,
-                easing: "easeOutQuad"
-              });
-
-              // 球体を透明に戻す
-              glow.setAttribute('animation__fadeout', {
-                property: 'material.opacity',
-                from: 0.8,
-                to: 0,
-                dur: 700,
-                delay: 300,
-                easing: "easeOutQuad"
-              });
-
-              // 周囲のライトも消灯
-              realLight.setAttribute('animation__lightoff', {
-                property: 'light.intensity',
-                from: 1.5,
-                to: 0,
-                dur: 900,
-                easing: "easeOutQuad"
-              });
+              glow.setAttribute('visible', false);
+              light.setAttribute('light', 'intensity', 0);
             }
           });
         }
@@ -174,10 +120,3 @@
 
   </body>
 </html>
-
-
-
-
-
-
-
