@@ -60,18 +60,6 @@
             animation__emissive="property: material.emissiveIntensity; dir: alternate; dur: 900; from: 1.5; to: 3.5; loop: true; easing: easeInOutSine">
           </a-sphere>
 
-          <!-- ◆ 光の尾（杖を振ると残像っぽく見える） -->
-          <a-cylinder id="wandTrail"
-            radius="0.015"
-            height="0.6"
-            color="#aaddff"
-            opacity="0.4"
-            visible="false"
-            position="0 0.15 -0.3"
-            rotation="90 0 0"
-            animation__fade="property: opacity; dir: alternate; dur: 500; from: 0.3; to: 0.6; loop: true; easing: easeInOutSine">
-          </a-cylinder>
-
           <!-- ◆ 周囲を照らすライト -->
           <a-entity id="wandLight"
             light="type: point; intensity: 0; distance: 4; decay: 2"
@@ -130,6 +118,7 @@
 
   </body>
 </html>
+
 
 
 
