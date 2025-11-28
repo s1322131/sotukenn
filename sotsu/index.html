@@ -49,10 +49,11 @@
 
         <!-- 杖（＋魔法光エフェクト） -->
         <a-entity id="wand"
-          gltf-model="tsue2.glb"
-          scale="0.2 0.2 0.2"
-          position="0 0 0"
-          rotation="300 0 0">
+            gltf-model="tsue2.glb"
+            follow-controller="id: rightController"
+            position="0 0 0"
+            rotation="0 0 0">
+
 
           <!-- ◆ 魔法の光（脈動・揺らぎ） -->
           <a-sphere id="wandGlow"
@@ -92,53 +93,74 @@
     </a-scene>
 
     <script>
-AFRAME.registerComponent('grab-object', {
-  init: function () {
-    const controller = document.querySelector('#rightController');
-    const target = this.el;  // 羽
-    let grabbing = false;
+        AFRAME.registerComponent('follow-controller', {
+          schema: { id: {type: 'string'} },
+        
+          init: function () {
+            this.controller = document.querySelector('#' + this.data.id);
+          },
+        
+          tick: function () {
+            if (!this.controller) return;
+        
+            // 位置を同期
+            this.el.object3D.position.copy(this.controller.object3D.position);
+        
+            // 回転を同期
+            this.el.object3D.quaternion.copy(this.controller.object3D.quaternion);
+          }
+        });
+    </script>
 
-    // コントローラー位置
-    const controllerPos = new THREE.Vector3();
 
-    // レイキャスター
-    const raycaster = new THREE.Raycaster();
-
-    controller.addEventListener('triggerdown', () => {
-      // コントローラーのワールド位置
-      controller.object3D.getWorldPosition(controllerPos);
-
-      // 前方向ベクトル
-      const direction = new THREE.Vector3(0, 0, -1)
-        .applyQuaternion(controller.object3D.getWorldQuaternion(new THREE.Quaternion()));
-
-      // レイ生成
-      raycaster.set(controllerPos, direction);
-
-      // 羽との当たり判定
-      const intersects = raycaster.intersectObject(target.object3D, true);
-
-      // 羽に当たったら掴む
-      if (intersects.length > 0) {
-        grabbing = true;
-      }
-    });
-
-    controller.addEventListener('triggerup', () => {
-      grabbing = false;
-    });
-
-    // 毎フレーム処理
-    this.el.sceneEl.addEventListener('tick', () => {
-      if (grabbing) {
-        controller.object3D.getWorldPosition(controllerPos);
-        // 羽をコントローラーに追従させる
-        target.object3D.position.copy(controllerPos);
-      }
-    });
-  }
-});
-</script>
+    <script>
+      AFRAME.registerComponent('grab-object', {
+        init: function () {
+          const controller = document.querySelector('#rightController');
+          const target = this.el;  // 羽
+          let grabbing = false;
+      
+          // コントローラー位置
+          const controllerPos = new THREE.Vector3();
+      
+          // レイキャスター
+          const raycaster = new THREE.Raycaster();
+      
+          controller.addEventListener('triggerdown', () => {
+            // コントローラーのワールド位置
+            controller.object3D.getWorldPosition(controllerPos);
+      
+            // 前方向ベクトル
+            const direction = new THREE.Vector3(0, 0, -1)
+              .applyQuaternion(controller.object3D.getWorldQuaternion(new THREE.Quaternion()));
+      
+            // レイ生成
+            raycaster.set(controllerPos, direction);
+      
+            // 羽との当たり判定
+            const intersects = raycaster.intersectObject(target.object3D, true);
+      
+            // 羽に当たったら掴む
+            if (intersects.length > 0) {
+              grabbing = true;
+            }
+          });
+      
+          controller.addEventListener('triggerup', () => {
+            grabbing = false;
+          });
+      
+          // 毎フレーム処理
+          this.el.sceneEl.addEventListener('tick', () => {
+            if (grabbing) {
+              controller.object3D.getWorldPosition(controllerPos);
+              // 羽をコントローラーに追従させる
+              target.object3D.position.copy(controllerPos);
+            }
+          });
+        }
+      });
+    </script>
 
     
     <!-- ================================ -->
@@ -182,6 +204,7 @@ AFRAME.registerComponent('grab-object', {
 
   </body>
 </html>
+
 
 
 
