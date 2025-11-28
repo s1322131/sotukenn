@@ -34,44 +34,38 @@
       </a-entity>
 
       
-      <!-- ================================ -->
       <!-- コントローラー（右手） -->
-      <!-- ================================ -->
-      <a-entity id="rightController"
-          laser-controls="hand: right"
-          raycaster="objects: .grabbable; far: 10"
-          oculus-touch-controls="hand: right; model: false"
-          vive-controls="hand: right"
-          windows-motion-controls="hand: right"
-          daydream-controls="hand: right"
-          gearvr-controls="hand: right">
-
-        <!-- 杖（＋魔法光エフェクト） -->
-      <a-entity id="wand"
-          follow-controller="id: rightController">
-      
-        <a-entity id="wandModel"
-            gltf-model="tsue2.glb"
-            position="0 0 -0.12"     <!-- ← まずこれを入れてみて！ -->
-            rotation="-90 0 0"       <!-- ← たぶんこの回転が近い -->
-            scale="0.2 0.2 0.2">
-        </a-entity>
-      
-        <!-- ◆ 魔法の光（脈動・揺らぎ） -->
-        <a-sphere id="wandGlow"
-          radius="0.06"
-          color="#88ccff"
-          emissive="#88ccff"
-          emissiveIntensity="2"
-          visible="false"
-          position="0 0 0.1">
-        </a-sphere>
-      
-        <!-- ◆ 周囲を照らすライト -->
-        <a-entity id="wandLight"
-          light="type: point; intensity: 0; distance: 4; decay: 2"
-          position="0 0 0.15">
-        </a-entity>
+      <a-entity id="rightController" 
+        laser-controls="hand: right" raycaster="objects: .grabbable; far: 10" 
+        oculus-touch-controls="hand: right; model: false" 
+        vive-controls="hand: right" 
+        windows-motion-controls="hand: right" 
+        daydream-controls="hand: right" 
+        gearvr-controls="hand: right"> 
+        
+        <!-- 杖（＋魔法光エフェクト） --> 
+        <a-entity id="wand" 
+          gltf-model="tsue2.glb" 
+          follow-controller="id: rightController" 
+          scale="0.2 0.2 0.2" rotation="0 0 0"> 
+          
+          <!-- ◆ 魔法の光（脈動・揺らぎ） --> 
+          <a-sphere id="wandGlow" 
+            radius="0.06" color="#88ccff" 
+            emissive="#88ccff" 
+            emissiveIntensity="2" 
+            visible="false" 
+            position="-1 -1 -1" 
+            animation__pulse="property: scale; dir: alternate; dur: 700; from: 1 1 1; to: 1.25 1.25 1.25; loop: true; easing: easeInOutSine" 
+            animation__emissive="property: material.emissiveIntensity; dir: alternate; dur: 900; from: 1.5; to: 3.5; loop: true; easing: easeInOutSine"> </a-sphere> 
+          
+          <!-- ◆ 周囲を照らすライト --> 
+          <a-entity id="wandLight" 
+            light="type: point; intensity: 0; distance: 4; decay: 2" 
+            position="0 0.15 0"> 
+          </a-entity> 
+        
+        </a-entity> 
       
       </a-entity>
 
