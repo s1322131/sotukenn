@@ -89,35 +89,44 @@
     <!-- 杖の光 ON/OFF スクリプト -->
     <!-- ================================ -->
     <script>
-      AFRAME.registerComponent('wand-light-control', {
-        init: function () {
+  AFRAME.registerComponent('wand-light-control', {
+    init: function () {
+      const controller = document.querySelector('#rightController');
+      const glow = document.querySelector('#wandGlow');
+      const light = document.querySelector('#wandLight');
 
-          const controller = document.querySelector('#rightController');
-          const glow = document.querySelector('#wandGlow');
-          const trail = document.querySelector('#wandTrail');
-          const light = document.querySelector('#wandLight');
+      let on = false;
 
-          let on = false;
+      // ダブルクリック判定
+      let lastClick = 0;
+      const threshold = 300; // 300ms以内に2回 → ダブルクリック
 
-          controller.addEventListener('triggerdown', () => {
-            on = !on;
+      controller.addEventListener('triggerdown', () => {
+        const now = performance.now();
 
-            if (on) {
-              glow.setAttribute('visible', true);
-              trail.setAttribute('visible', true);
-              light.setAttribute('light', 'intensity', 2);
-            } else {
-              glow.setAttribute('visible', false);
-              trail.setAttribute('visible', false);
-              light.setAttribute('light', 'intensity', 0);
-            }
-          });
+        if (now - lastClick < threshold) {
+          // ダブルクリック成功 → 光のON/OFF切り替え
+          on = !on;
+
+          if (on) {
+            glow.setAttribute('visible', true);
+            light.setAttribute('light', 'intensity', 2);
+          } else {
+            glow.setAttribute('visible', false);
+            light.setAttribute('light', 'intensity', 0);
+          }
         }
+
+        lastClick = now;
       });
-    </script>
+    }
+  });
+</script>
+
 
   </body>
 </html>
+
 
 
 
