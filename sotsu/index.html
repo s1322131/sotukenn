@@ -1,269 +1,166 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="utf-8" />
-    <title>VR 魔法杖＋先生モデル</title>
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  </head>
-  <body>
-    <a-scene vr-mode-ui="enabled: true" wand-light-control>
+<head>
+  <meta charset="utf-8" />
+  <title>VR 魔法杖＋先生モデル</title>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+</head>
 
-      <!-- 背景360度 -->
-      <a-sky src="back.png" rotation="0 -90 0"></a-sky>
+<body>
+<a-scene vr-mode-ui="enabled: true" wand-light-control>
 
-      <!-- カメラ -->
-      <a-entity camera look-controls position="0 -3 0"></a-entity>
+  <!-- 背景360度 -->
+  <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
+  <!-- カメラ -->
+  <a-entity camera look-controls position="0 -3 0"></a-entity>
 
+  <!-- 先生モデル -->
+  <a-entity id="teacher"
+    gltf-model="teacher11.glb"
+    animation-mixer
+    position="0 -20 -20"
+    rotation="0 10 0"
+    scale="14 14 14">
+  </a-entity>
 
-      <!-- 先生モデル（アニメーション付き） -->
-      <a-entity id="teacher"
-        gltf-model="teacher11.glb"
-        animation-mixer
-        position="0 -20 -20"
-        rotation="0 10 0"
-        scale="14 14 14">
+  <!-- コントローラー（右手） -->
+  <a-entity id="rightController" 
+    laser-controls="hand: right"
+    raycaster="objects: .grabbable; far: 10"
+    oculus-touch-controls="hand: right; model: false"
+    vive-controls="hand: right"
+    windows-motion-controls="hand: right"
+    daydream-controls="hand: right"
+    gearvr-controls="hand: right">
+
+    <!-- 杖 -->
+    <a-entity id="wand"
+      gltf-model="tsue2.glb"
+      scale="0.2 0.2 0.2"
+      position="0 0 0"
+      rotation="150 123 180">
+
+      <!-- 魔法の光 -->
+      <a-sphere id="wandGlow"
+        radius="0.06" color="#88ccff"
+        emissive="#88ccff"
+        emissiveIntensity="2"
+        visible="false"
+        position="-1 -1 -1"
+        animation__pulse="property: scale; dir: alternate; dur: 700; from: 1 1 1; to: 1.25 1.25 1.25; loop: true; easing: easeInOutSine"
+        animation__emissive="property: material.emissiveIntensity; dir: alternate; dur: 900; from: 1.5; to: 3.5; loop: true; easing: easeInOutSine">
+      </a-sphere>
+
+      <!-- 光のライト -->
+      <a-entity id="wandLight"
+        light="type: point; intensity: 0; distance: 4; decay: 2"
+        position="0 0.15 0">
       </a-entity>
 
-      
-      <!-- コントローラー（右手） -->
-      <a-entity id="rightController" 
-        laser-controls="hand: right" 
-        raycaster="objects: .grabbable; far: 10" 
-        oculus-touch-controls="hand: right; model: false" 
-        vive-controls="hand: right" 
-        windows-motion-controls="hand: right" 
-        daydream-controls="hand: right" 
-        gearvr-controls="hand: right"> 
-        
-        <!-- 杖（＋魔法光エフェクト） --> 
-        <a-entity id="wand" 
-          gltf-model="tsue2.glb"
-          scale="0.2 0.2 0.2" 
-          position="0 0 0"
-          rotation="150 126 180"> 
-          
-          <!-- ◆ 魔法の光（脈動・揺らぎ） --> 
-          <a-sphere id="wandGlow" 
-            radius="0.06" color="#88ccff" 
-            emissive="#88ccff" 
-            emissiveIntensity="2" 
-            visible="false" 
-            position="-1 -1 -1" 
-            animation__pulse="property: scale; dir: alternate; dur: 700; from: 1 1 1; to: 1.25 1.25 1.25; loop: true; easing: easeInOutSine" 
-            animation__emissive="property: material.emissiveIntensity; dir: alternate; dur: 900; from: 1.5; to: 3.5; loop: true; easing: easeInOutSine"> </a-sphere>
+    </a-entity>
+  </a-entity>
 
-          
-          
-          <!-- ◆ 周囲を照らすライト --> 
-          <a-entity id="wandLight" 
-            light="type: point; intensity: 0; distance: 4; decay: 2" 
-            position="0 0.15 0"> 
-          </a-entity> 
-          
-        </a-entity> 
-      
-      </a-entity>
+  <!-- 羽（右手の外側に独立配置） -->
+  <a-entity id="feather"
+    gltf-model="hane.glb"
+    class="grabbable"
+    position="0 -1 -3"
+    rotation="0 90 0"
+    scale="0.3 0.3 0.3"
+    feather-float-control>
 
-      <!-- 羽（白で表示） -->
-      <a-entity id="feather"
-        gltf-model="hane.glb"
-        class="grabbable"
-        grab-object
-        position="0 -1 -3"
-        rotation="0 90 0"
-        scale="0.3 0.3 0.3"
-        feather-float-control>
-        
-        <a-animation
-          id="floatAnim"
-          attribute="position"
-          dur="3000"
-          direction="alternate"
-          repeat="indefinite"
-          to="0 -0.7 -3"
-          begin="startFloat">
-        </a-animation>
-      
-      </a-entity>
+    <!-- 浮遊アニメーション -->
+    <a-animation
+      id="floatAnim"
+      attribute="position"
+      dur="3000"
+      direction="alternate"
+      repeat="indefinite"
+      to="0 -0.7 -3"
+      begin="startFloat">
+    </a-animation>
+  </a-entity>
+
+  <!-- ハンドトラッキング -->
+  <a-entity id="rightHandTracking" hand-tracking-controls="hand: right"></a-entity>
+
+  <!-- 左手 -->
+  <a-entity id="leftHand"
+    oculus-touch-controls="hand: left"
+    hand-tracking-controls="hand: left"></a-entity>
+
+  <!-- 照明 -->
+  <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+  <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
+
+</a-scene>
 
 
-      <!-- ハンドトラッキング -->
-      <a-entity id="rightHandTracking" hand-tracking-controls="hand: right"></a-entity>
+<!-- ===================================== -->
+<!-- 羽：レイが当たったら浮遊する処理 -->
+<!-- ===================================== -->
+<script>
+AFRAME.registerComponent('feather-float-control', {
+  init: function () {
+    const controller = document.querySelector('#rightController');
+    const feather = this.el;
 
-      <!-- 左手 -->
-      <a-entity id="leftHand"
-        oculus-touch-controls="hand: left"
-        hand-tracking-controls="hand: left">
-      </a-entity>
+    const raycaster = new THREE.Raycaster();
+    const controllerPos = new THREE.Vector3();
+    const direction = new THREE.Vector3();
 
-      <!-- 照明 -->
-      <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-      <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
+    controller.addEventListener('triggerdown', () => {
 
-    </a-scene>
+      // コントローラーの位置
+      controller.object3D.getWorldPosition(controllerPos);
 
-    <script>
-    AFRAME.registerComponent('feather-float-control', {
-      init: function () {
-        const controller = document.querySelector('#rightController');
-        const feather = document.querySelector('#feather');
-    
-        // Raycaster 用
-        const raycaster = new THREE.Raycaster();
-        const controllerPos = new THREE.Vector3();
-        const direction = new THREE.Vector3();
-    
-        controller.addEventListener('triggerdown', () => {
-          // コントローラーのワールド位置
-          controller.object3D.getWorldPosition(controllerPos);
-    
-          // コントローラーが向いている方向ベクトル
-          direction.set(0, 0, -1)
-            .applyQuaternion(controller.object3D.getWorldQuaternion(new THREE.Quaternion()));
-    
-          // レイを飛ばす
-          raycaster.set(controllerPos, direction);
-    
-          // 羽との当たり判定
-          const intersects = raycaster.intersectObject(feather.object3D, true);
-    
-          if (intersects.length > 0) {
-            // 羽にレイが当たっていた → 浮遊アニメーション開始
-            feather.emit('startFloat');
-          }
-        });
+      // 前方向ベクトル（Zマイナス）
+      direction.set(0, 0, -1)
+        .applyQuaternion(controller.object3D.getWorldQuaternion(new THREE.Quaternion()));
+
+      // レイをセット
+      raycaster.set(controllerPos, direction);
+
+      // 羽との当たり判定
+      const hit = raycaster.intersectObject(feather.object3D, true);
+
+      if (hit.length > 0) {
+        feather.emit('startFloat');  // 浮遊開始
       }
     });
-    </script>
-
-
-    
-    <!-- ================================ -->
-    <!-- 杖の光 ON/OFF スクリプト -->
-    <!-- ================================ -->
-    <script>
-  AFRAME.registerComponent('wand-light-control', {
-    init: function () {
-      const controller = document.querySelector('#rightController');
-      const glow = document.querySelector('#wandGlow');
-      const light = document.querySelector('#wandLight');
-
-      let on = false;
-
-      // ダブルクリック判定
-      let lastClick = 0;
-      const threshold = 300; // 300ms以内に2回 → ダブルクリック
-
-      controller.addEventListener('triggerdown', () => {
-        const now = performance.now();
-
-        if (now - lastClick < threshold) {
-          // ダブルクリック成功 → 光のON/OFF切り替え
-          on = !on;
-
-          if (on) {
-            glow.setAttribute('visible', true);
-            light.setAttribute('light', 'intensity', 2);
-          } else {
-            glow.setAttribute('visible', false);
-            light.setAttribute('light', 'intensity', 0);
-          }
-        }
-
-        lastClick = now;
-      });
-    }
-  });
+  }
+});
 </script>
 
 
-  </body>
+<!-- ===================================== -->
+<!-- 杖の光 ON/OFF ダブルトリガー -->
+<!-- ===================================== -->
+<script>
+AFRAME.registerComponent('wand-light-control', {
+  init: function () {
+    const controller = document.querySelector('#rightController');
+    const glow = document.querySelector('#wandGlow');
+    const light = document.querySelector('#wandLight');
+
+    let on = false;
+    let lastClick = 0;
+    const threshold = 300;
+
+    controller.addEventListener('triggerdown', () => {
+      const now = performance.now();
+
+      if (now - lastClick < threshold) {
+        on = !on;
+        glow.setAttribute('visible', on);
+        light.setAttribute('light', 'intensity', on ? 2 : 0);
+      }
+      lastClick = now;
+    });
+  }
+});
+</script>
+
+</body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
