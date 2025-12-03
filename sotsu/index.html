@@ -62,30 +62,30 @@
           </a-entity> 
           
         </a-entity> 
-
-         <!-- 羽（白で表示） -->
-          <a-entity id="feather"
-            gltf-model="hane.glb"
-            class="grabbable"
-            grab-object
-            position="0 -1 -3"
-            rotation="0 90 0"
-            scale="0.3 0.3 0.3"
-            float-on-click>
-          
-            <!-- 浮遊アニメーション（デフォルトでは停止） -->
-            <a-animation
-              id="floatAnim"
-              attribute="position"
-              dur="3000"
-              direction="alternate"
-              repeat="indefinite"
-              to="0 -0.7 -3"
-              begin="startFloat">
-            </a-animation>
-    
-          </a-entity>
       
+      </a-entity>
+
+      <!-- 羽（白で表示） -->
+      <a-entity id="feather"
+        gltf-model="hane.glb"
+        class="grabbable"
+        grab-object
+        position="0 -1 -3"
+        rotation="0 90 0"
+        scale="0.3 0.3 0.3"
+        float-on-click>
+          
+        <!-- 浮遊アニメーション（デフォルトでは停止） -->
+        <a-animation
+          id="floatAnim"
+          attribute="position"
+          dur="3000"
+          direction="alternate"
+          repeat="indefinite"
+          to="0 -0.7 -3"
+          begin="startFloat">
+        </a-animation>
+    
       </a-entity>
 
       <!-- ハンドトラッキング -->
@@ -162,6 +162,7 @@
 
   </body>
 </html>
+
 
 
 
