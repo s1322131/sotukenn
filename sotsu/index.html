@@ -73,9 +73,8 @@
         position="0 -1 -3"
         rotation="0 90 0"
         scale="0.3 0.3 0.3"
-        float-on-click>
-          
-        <!-- 浮遊アニメーション（デフォルトでは停止） -->
+        feather-float-control>
+        
         <a-animation
           id="floatAnim"
           attribute="position"
@@ -85,8 +84,9 @@
           to="0 -0.7 -3"
           begin="startFloat">
         </a-animation>
-    
+      
       </a-entity>
+
 
       <!-- ハンドトラッキング -->
       <a-entity id="rightHandTracking" hand-tracking-controls="hand: right"></a-entity>
@@ -103,22 +103,40 @@
 
     </a-scene>
 
-<script>
-  AFRAME.registerComponent('float-on-click', {
-    init: function () {
-      const el = this.el;
-  
-      el.addEventListener('click', () => {
-        el.emit('startFloat');   // アニメーション開始
-      });
-    }
-  });
-</script>
+    <script>
+    AFRAME.registerComponent('feather-float-control', {
+      init: function () {
+        const controller = document.querySelector('#rightController');
+        const feather = document.querySelector('#feather');
+    
+        // Raycaster 用
+        const raycaster = new THREE.Raycaster();
+        const controllerPos = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+    
+        controller.addEventListener('triggerdown', () => {
+          // コントローラーのワールド位置
+          controller.object3D.getWorldPosition(controllerPos);
+    
+          // コントローラーが向いている方向ベクトル
+          direction.set(0, 0, -1)
+            .applyQuaternion(controller.object3D.getWorldQuaternion(new THREE.Quaternion()));
+    
+          // レイを飛ばす
+          raycaster.set(controllerPos, direction);
+    
+          // 羽との当たり判定
+          const intersects = raycaster.intersectObject(feather.object3D, true);
+    
+          if (intersects.length > 0) {
+            // 羽にレイが当たっていた → 浮遊アニメーション開始
+            feather.emit('startFloat');
+          }
+        });
+      }
+    });
+    </script>
 
-
-      
-         
-      
 
     
     <!-- ================================ -->
@@ -162,6 +180,7 @@
 
   </body>
 </html>
+
 
 
 
