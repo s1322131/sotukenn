@@ -17,7 +17,7 @@
 <body>
   <a-scene vr-mode-ui="enabled: true" wand-light-control physics="debug: true">
 
-    <!-- 字幕（クリックで次へ進む） -->
+    <!-- 字幕（クリックで切り替え） -->
     <a-plane id="subtitle"
              src="teacher1.png"
              position="0 -5 -15"
@@ -28,7 +28,6 @@
              class="clickable"
              subtitle-switcher>
     </a-plane>
-
 
     <!-- 背景 -->
     <a-sky src="back.png" rotation="0 -90 0"></a-sky>
@@ -51,13 +50,14 @@
               position="10 -1 -3"
               rotation="0 0 0"
               scale="1 1 1"
-              class="grabbable"
+              class="grabbable hoverable"
               grabbable
+              hoverable
               dynamic-body="shape: box; mass: 5"
               shape="box">
     </a-entity>
 
-    <!-- 右手のコントローラー -->
+    <!-- 右コントローラ -->
     <a-entity id="rightController"
               laser-controls="hand: right"
               oculus-touch-controls="hand: right; model: false"
@@ -66,6 +66,7 @@
               daydream-controls="hand: right"
               gearvr-controls="hand: right"
               super-hands
+              toggle-grab-control
               sphere-collider="objects: .clickable"
               raycaster="objects: .grabbable, .hoverable; far: 15">
 
@@ -100,18 +101,19 @@
     <!-- 羽（掴める） -->
     <a-entity id="feather"
               gltf-model="hane.glb"
-              class="grabbable"
+              class="grabbable hoverable"
               position="0 -1 -3"
               rotation="0 90 0"
               scale="0.3 0.3 0.3"
               grabbable
+              hoverable
               dynamic-body="shape: box; mass: 0.1"
               shape="box">
     </a-entity>
 
     <!-- テスト用ボックス -->
     <a-box id="testBox"
-           class="grabbable"
+           class="grabbable hoverable"
            grabbable
            hoverable
            color-feedback
@@ -157,7 +159,7 @@
     });
   </script>
 
-  <!-- トリガーで羽の掴み切り替え -->
+  <!-- トリガーで羽を掴む / 離す -->
   <script>
     AFRAME.registerComponent('toggle-grab-control', {
       init: function () {
@@ -170,10 +172,10 @@
           isGrabbing = !isGrabbing;
 
           if (isGrabbing) {
-            targetFeather.emit('grab-start', { detail: { hand: controller } }, true);
+            targetFeather.emit('grab-start', { hand: controller }, true);
             console.log('Feather Grab Started');
           } else {
-            targetFeather.emit('grab-end', { detail: { hand: controller } }, true);
+            targetFeather.emit('grab-end', { hand: controller }, true);
             console.log('Feather Grab Ended');
           }
         });
@@ -181,7 +183,7 @@
     });
   </script>
 
-  <!-- 色変化テスト -->
+  <!-- 色の変化テスト -->
   <script>
     AFRAME.registerComponent('color-feedback', {
       init: function () {
@@ -207,34 +209,21 @@
     });
   </script>
 
+  <!-- PNG切り替え -->
   <script>
-      AFRAME.registerComponent('subtitle-switcher', {
-        init: function () {
-          const el = this.el;
-      
-          // 切り替えるPNGファイル
-          const subtitles = ['teacher1.png', 'teacher2.png'];
-      
-          let index = 0;
-      
-          el.addEventListener('click', () => {
-            index = (index + 1) % subtitles.length;
-            el.setAttribute('src', subtitles[index]);
-          });
-        }
-      });
-  </script>
+    AFRAME.registerComponent('subtitle-switcher', {
+      init: function () {
+        const el = this.el;
+        const subtitles = ['teacher1.png', 'teacher2.png'];
+        let index = 0;
 
+        el.addEventListener('click', () => {
+          index = (index + 1) % subtitles.length;
+          el.setAttribute('src', subtitles[index]);
+        });
+      }
+    });
+  </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
