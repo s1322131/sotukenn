@@ -116,5 +116,36 @@ AFRAME.registerComponent('wand-light-control', {
   }
 });
 </script>
+
+<script>
+
+         AFRAME.registerComponent('toggle-grab-control', {
+             init: function () {
+                 const controller = this.el; // このコンポーネントがアタッチされるコントローラーエンティティ
+                 const targetFeather = document.querySelector('#feather');
+                 
+                 // 掴み状態を保持するフラグ
+                 let isGrabbing = false;
+         
+                 // トリガーボタンが押されたときの処理
+                 controller.addEventListener('triggerdown', () => {
+                     // 現在の掴み状態を反転
+                     isGrabbing = !isGrabbing;
+                     
+                     if (isGrabbing) {
+                         // 掴み開始 (grab-start イベントを発火)
+                         // super-handsは、このイベントを受信すると、raycasterが衝突しているオブジェクトを掴みます。
+                         targetFeather.emit('grab-start', { detail: { hand: controller } }, true);
+                         console.log('Feather Grab Started');
+                     } else {
+                         // 掴み終了 (grab-end イベントを発火)
+                         targetFeather.emit('grab-end', { detail: { hand: controller } }, true);
+                         console.log('Feather Grab Ended');
+                     }
+                 });
+             }
+         });
+</script>
 </body>
 </html>
+
