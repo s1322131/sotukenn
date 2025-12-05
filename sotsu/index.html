@@ -7,9 +7,6 @@
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 
-  <!-- Super Hands -->
-  <script src="https://cdn.jsdelivr.net/gh/wmurphyrd/aframe-super-hands-component@4.0.5/dist/aframe-super-hands.min.js"></script>
-
   <!-- Physics -->
   <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
 </head>
@@ -17,12 +14,12 @@
 <body>
   <a-scene vr-mode-ui="enabled: true" wand-light-control physics="debug: true">
 
-    <!-- 字幕（クリックで切り替え） -->
+    <!-- 字幕 -->
     <a-plane id="subtitle"
              src="teacher1.png"
              position="0 -5 -15"
-             rotation="0 0 90"
-             width="6.5"
+             rotation="0 0 0"
+             width="8"
              height="5"
              transparent="true"
              shader="flat"
@@ -45,33 +42,14 @@
               scale="14 14 14">
     </a-entity>
 
-    <!-- 箒（掴める） -->
-    <a-entity id="houki"
-              gltf-model="houki1.glb"
-              position="10 -1 -3"
-              rotation="0 0 0"
-              scale="1 1 1"
-              class="grabbable hoverable"
-              grabbable
-              hoverable
-              dynamic-body="shape: box; mass: 5"
-              shape="box">
-    </a-entity>
-
     <!-- 右コントローラ -->
     <a-entity id="rightController"
         laser-controls="hand: right"
-        oculus-touch-controls="hand: right; model: false"
-        vive-controls="hand: right"
-        windows-motion-controls="hand: right"
-        daydream-controls="hand: right"
-        gearvr-controls="hand: right"
-        super-hands
-        toggle-grab-control
-        sphere-collider="objects: .clickable, .grabbable, .hoverable"
-        raycaster="objects: .clickable, .grabbable, .hoverable; far: 15">
-
-
+        raycaster="objects: .interactable; lineColor: red; far: 20"
+        simple-grab
+        attract-houki
+        >
+      
       <!-- 杖 -->
       <a-entity id="wand"
                 gltf-model="tsue2.glb"
@@ -86,9 +64,7 @@
                   emissive="#88ccff"
                   emissiveIntensity="2"
                   visible="false"
-                  position="-5 -3 0"
-                  animation__pulse="property: scale; dir: alternate; dur: 700; from: 1 1 1; to: 1.25 1.25 1.25; loop: true; easing: easeInOutSine"
-                  animation__emissive="property: material.emissiveIntensity; dir: alternate; dur: 900; from: 1.5; to: 3.5; loop: true; easing: easeInOutSine">
+                  position="-5 -3 0">
         </a-sphere>
 
         <!-- 杖ライト -->
@@ -100,34 +76,34 @@
       </a-entity>
     </a-entity>
 
+
     <!-- 羽（掴める） -->
     <a-entity id="feather"
+              class="interactable grab-target"
               gltf-model="hane.glb"
-              class="grabbable hoverable"
               position="0 -1 -3"
               rotation="0 90 0"
-              scale="0.3 0.3 0.3"
-              grabbable
-              hoverable
-              dynamic-body="shape: box; mass: 0.1"
-              shape="box">
+              scale="0.3 0.3 0.3">
     </a-entity>
 
-    <!-- テスト用ボックス -->
+    <!-- テスト用ボックス（掴める） -->
     <a-box id="testBox"
-           class="grabbable hoverable"
-           grabbable
-           hoverable
-           color-feedback
-           position="-5 0 0"
-           rotation="90 0 0"
-           depth="0.5"
-           height="0.5"
-           width="0.9"
+           class="interactable grab-target"
            color="#ff8844"
-           dynamic-body="shape: box; mass: 1"
-           shape="box">
+           position="-5 0 -3"
+           width="0.9"
+           height="0.5"
+           depth="0.5">
     </a-box>
+
+    <!-- ほうき（引き寄せられる） -->
+    <a-entity id="houki"
+              class="interactable houki-target"
+              gltf-model="houki1.glb"
+              position="10 -1 -3"
+              scale="1 1 1">
+    </a-entity>
+
 
     <!-- ライト -->
     <a-entity light="type: ambient; intensity: 0.8"></a-entity>
@@ -135,7 +111,8 @@
 
   </a-scene>
 
-  <!-- 杖ライト制御 -->
+
+  <!-- 杖ライト制御（ダブルトリガー） -->
   <script>
     AFRAME.registerComponent('wand-light-control', {
       init: function () {
@@ -161,57 +138,84 @@
     });
   </script>
 
-  <!-- トリガーで羽を掴む / 離す -->
+
+
+
+  <!-- --------------------------------------------------------------
+       1) simple-grab（羽と四角を掴む）superhands無し版
+  -------------------------------------------------------------- -->
   <script>
-    AFRAME.registerComponent('toggle-grab-control', {
+    AFRAME.registerComponent('simple-grab', {
       init: function () {
         const controller = this.el;
-        const targetFeather = document.querySelector('#feather');
-
-        let isGrabbing = false;
+        let grabbingEl = null;
 
         controller.addEventListener('triggerdown', () => {
-          isGrabbing = !isGrabbing;
+          const hits = controller.components.raycaster.intersections;
+          if (!hits || hits.length === 0) return;
 
-          if (isGrabbing) {
-            targetFeather.emit('grab-start', { hand: controller }, true);
-            console.log('Feather Grab Started');
-          } else {
-            targetFeather.emit('grab-end', { hand: controller }, true);
-            console.log('Feather Grab Ended');
+          const target = hits[0].object.el;
+          if (target.classList.contains("grab-target")) {
+            grabbingEl = target;
+            controller.appendChild(grabbingEl);
+            grabbingEl.setAttribute("position", "0 0 -0.5");
           }
         });
+
+        controller.addEventListener('triggerup', () => {
+          if (!grabbingEl) return;
+
+          const worldPos = new THREE.Vector3();
+          grabbingEl.object3D.getWorldPosition(worldPos);
+
+          controller.sceneEl.appendChild(grabbingEl);
+          grabbingEl.setAttribute("position",
+            `${worldPos.x} ${worldPos.y} ${worldPos.z}`);
+
+          grabbingEl = null;
+        });
       }
     });
   </script>
 
-  <!-- 色の変化テスト -->
+
+
+  <!-- --------------------------------------------------------------
+       2) attract-houki（ほうきを引き寄せる）
+  -------------------------------------------------------------- -->
   <script>
-    AFRAME.registerComponent('color-feedback', {
+    AFRAME.registerComponent('attract-houki', {
       init: function () {
-        const el = this.el;
-        const originalColor = el.getAttribute('material').color;
+        const controller = this.el;
+        const scene = controller.sceneEl;
 
-        el.addEventListener('hover-start', () => {
-          el.setAttribute('color', '#33ccff');
-        });
+        controller.addEventListener("triggerdown", () => {
+          const hits = controller.components.raycaster.intersections;
+          if (!hits.length) return;
 
-        el.addEventListener('hover-end', () => {
-          el.setAttribute('color', originalColor);
-        });
+          const target = hits[0].object.el;
 
-        el.addEventListener('grab-start', () => {
-          el.setAttribute('color', '#ff4444');
-        });
+          // ほうきだけ反応
+          if (!target.classList.contains("houki-target")) return;
 
-        el.addEventListener('grab-end', () => {
-          el.setAttribute('color', originalColor);
+          // controller の位置へスーッと移動
+          const ctrlPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(ctrlPos);
+
+          target.setAttribute("animation__attract", {
+            property: "position",
+            to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+            dur: 600,
+            easing: "easeOutQuad"
+          });
         });
       }
     });
   </script>
 
-  <!-- PNG切り替え -->
+
+
+  <!-- PNG切り替え（字幕） -->
   <script>
     AFRAME.registerComponent('subtitle-switcher', {
       init: function () {
@@ -229,13 +233,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
