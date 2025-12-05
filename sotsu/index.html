@@ -17,6 +17,19 @@
 <body>
   <a-scene vr-mode-ui="enabled: true" wand-light-control physics="debug: true">
 
+    <!-- 字幕（クリックで次へ進む） -->
+    <a-plane id="subtitle"
+             src="teacher1.png"
+             position="0 -5 -15"
+             width="12"
+             height="3"
+             transparent="true"
+             shader="flat"
+             class="clickable"
+             subtitle-switcher>
+    </a-plane>
+
+
     <!-- 背景 -->
     <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
@@ -53,6 +66,7 @@
               daydream-controls="hand: right"
               gearvr-controls="hand: right"
               super-hands
+              sphere-collider="objects: .clickable"
               raycaster="objects: .grabbable, .hoverable; far: 15">
 
       <!-- 杖 -->
@@ -192,8 +206,28 @@
     });
   </script>
 
+  <script>
+      AFRAME.registerComponent('subtitle-switcher', {
+        init: function () {
+          const el = this.el;
+      
+          // 切り替えるPNGファイル
+          const subtitles = ['teacher1.png', 'teacher2.png'];
+      
+          let index = 0;
+      
+          el.addEventListener('click', () => {
+            index = (index + 1) % subtitles.length;
+            el.setAttribute('src', subtitles[index]);
+          });
+        }
+      });
+  </script>
+
+
 </body>
 </html>
+
 
 
 
