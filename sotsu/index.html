@@ -1,153 +1,98 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>VR 魔法杖＋先生モデル＋羽つかみ＋ほうき召喚</title>
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <!-- Super Hands -->
-  <script src="https://cdn.jsdelivr.net/gh/wmurphyrd/aframe-super-hands-component@4.0.5/dist/aframe-super-hands.min.js"></script>
-
-  <!-- ほうき召喚コンポーネント -->
-  <script>
-    AFRAME.registerComponent('houki-move', {
-      init: function () {
-        const el = this.el;
-
-        el.addEventListener('click', () => {
-          // カメラ（プレイヤー）のワールド座標を取得
-          const cam = document.querySelector('[camera]');
-          const camPos = cam.object3D.getWorldPosition(new THREE.Vector3());
-
-          // プレイヤーのちょい手前に来るように Z を調整
-          const targetPos = {
-            x: camPos.x,
-            y: camPos.y - 0.2,
-            z: camPos.z - 1
-          };
-
-          // アニメーションで移動
-          el.setAttribute('animation__move', {
-            property: 'position',
-            to: `${targetPos.x} ${targetPos.y} ${targetPos.z}`,
-            dur: 700,
-            easing: 'easeOutQuad'
-          });
-        });
-      }
-    });
-  </script>
+  <meta charset="utf-8">
+  <title>VR 魔法杖＋先生モデル＋羽つかみ</title>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/wmurphyrd/aframe-super-hands-component@4.0.5/dist/aframe-super-hands.min.js"></script>
 </head>
-
 <body>
-<a-scene vr-mode-ui="enabled: true"
-         wand-light-control
-         cursor="rayOrigin: mouse"
-         raycaster="objects: .clickable">
+<a-scene vr-mode-ui="enabled: true" wand-light-control>
 
-  <!-- 背景360度 -->
-  <a-sky src="back.png" rotation="0 -90 0"></a-sky>
+    <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
-  <!-- カメラ -->
-  <a-entity camera look-controls position="0 -3 0"></a-entity>
+    <a-entity camera look-controls position="0 -3 0"></a-entity>
 
-  <!-- 先生モデル -->
-  <a-entity id="teacher"
-            gltf-model="teacher11.glb"
-            animation-mixer
-            position="0 -20 -20"
-            rotation="0 10 0"
-            scale="14 14 14">
-  </a-entity>
+    <a-entity id="teacher"
+            gltf-model="teacher11.glb"
+            animation-mixer
+            position="0 -20 -20"
+            rotation="0 10 0"
+            scale="14 14 14">
+  </a-entity>
+  
+    <a-entity id="houki"
+        gltf-model="houki1.glb"
+        position="10 -1 -3"
+        rotation="0 0 0"
+        scale="1 1 1"
+        class="grabbable"           grabbable>             </a-entity>
+      
+    <a-entity id="rightController" 
+            laser-controls="hand: right" 
+            oculus-touch-controls="hand: right; model: false" 
+            vive-controls="hand: right" 
+            windows-motion-controls="hand: right" 
+            daydream-controls="hand: right" 
+            gearvr-controls="hand: right"
+            super-hands
+            raycaster="objects: .grabbable; far: 15">      <a-entity id="wand" 
+            gltf-model="tsue2.glb"
+            scale="0.2 0.2 0.2" 
+            position="0 0 0"
+            rotation="150 121 180"> 
+    <a-sphere id="wandGlow" 
+              radius="0.06" color="#88ccff" 
+              emissive="#88ccff" 
+              emissiveIntensity="2" 
+              visible="false" 
+              position="0 0.15 0"                animation__pulse="property: scale; dir: alternate; dur: 700; from: 1 1 1; to: 1.25 1.25 1.25; loop: true; easing: easeInOutSine" 
+              animation__emissive="property: material.emissiveIntensity; dir: alternate; dur: 900; from: 1.5; to: 3.5; loop: true; easing: easeInOutSine"> 
+    </a-sphere>
+    <a-entity id="wandLight" 
+              light="type: point; intensity: 0; distance: 4; decay: 2" 
+              position="0 0.15 0"> 
+    </a-entity> 
+    
+  </a-entity> 
+  </a-entity>
+    <a-entity id="feather"
+            gltf-model="hane.glb"
+            class="grabbable"
+            position="0 -1 -3"
+            rotation="0 90 0"
+            scale="0.3 0.3 0.3"
+            grabbable>
+  </a-entity>
 
-  <!-- ほうき（クリックで飛んでくる） -->
-  <a-entity id="houki"
-            gltf-model="houki1.glb"
-            class="clickable"
-            houki-move
-            position="10 -5 -3"
-            rotation="0 0 0"
-            scale="1 1 1">
-  </a-entity>
-
-  <!-- コントローラー -->
-  <a-entity id="rightController"
-            laser-controls="hand: right"
-            oculus-touch-controls="hand: right; model: false"
-            vive-controls="hand: right"
-            windows-motion-controls="hand: right"
-            daydream-controls="hand: right"
-            gearvr-controls="hand: right"
-            super-hands>
-
-    <!-- 杖 -->
-    <a-entity id="wand"
-              gltf-model="tsue2.glb"
-              scale="0.2 0.2 0.2"
-              position="0 0 0"
-              rotation="150 121 180">
-
-      <!-- 光る玉 -->
-      <a-sphere id="wandGlow"
-                radius="0.06" color="#88ccff"
-                emissive="#88ccff"
-                emissiveIntensity="2"
-                visible="false"
-                position="0 -1 0"
-                animation__pulse="property: scale; dir: alternate; dur: 700; from: 1 1 1; to: 1.25 1.25 1.25; loop: true; easing: easeInOutSine"
-                animation__emissive="property: material.emissiveIntensity; dir: alternate; dur: 900; from: 1.5; to: 3.5; loop: true; easing: easeInOutSine">
-      </a-sphere>
-
-      <!-- 光源 -->
-      <a-entity id="wandLight"
-                light="type: point; intensity: 0; distance: 4; decay: 2"
-                position="0 0.15 0">
-      </a-entity>
-
-    </a-entity>
-  </a-entity>
-
-  <!-- 羽（つかめる） -->
-  <a-entity id="feather"
-            gltf-model="hane.glb"
-            class="grabbable"
-            position="0 -1 -3"
-            rotation="0 90 0"
-            scale="0.3 0.3 0.3"
-            grabbable>
-  </a-entity>
-
-  <!-- 照明 -->
-  <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-  <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
+    <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+  <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
 
 </a-scene>
 
-<!-- 杖の光制御 -->
 <script>
+// 杖の光 ON/OFF
 AFRAME.registerComponent('wand-light-control', {
-  init: function () {
-    const controller = document.querySelector('#rightController');
-    const glow = document.querySelector('#wandGlow');
-    const light = document.querySelector('#wandLight');
+  init: function () {
+    const controller = document.querySelector('#rightController');
+    const glow = document.querySelector('#wandGlow');
+    const light = document.querySelector('#wandLight');
 
-    let on = false;
-    let lastClick = 0;
-    const threshold = 300;
+    let on = false;
+    let lastClick = 0;
+    const threshold = 300;
 
-    controller.addEventListener('triggerdown', () => {
-      const now = performance.now();
-      if (now - lastClick < threshold) {
-        on = !on;
-        glow.setAttribute('visible', on);
-        light.setAttribute('light', 'intensity', on ? 2 : 0);
-      }
-      lastClick = now;
-    });
-  }
+    controller.addEventListener('triggerdown', () => {
+      const now = performance.now();
+      if (now - lastClick < threshold) {
+        on = !on;
+        glow.setAttribute('visible', on);
+        light.setAttribute('light', 'intensity', on ? 2 : 0);
+      }
+      lastClick = now;
+    });
+  }
 });
 </script>
-
 </body>
 </html>
-
-
