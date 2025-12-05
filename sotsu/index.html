@@ -80,7 +80,7 @@
     <a-box id="testBox"
          class="grabbable"
          grabbable
-         position="0 -1 -2"
+         position="-5 0 0"
          depth="0.5" height="0.5" width="0.5"
          color="#ff8844"
          dynamic-body="shape: box; mass: 1"              
@@ -118,8 +118,7 @@ AFRAME.registerComponent('wand-light-control', {
 </script>
 
 <script>
-
-         AFRAME.registerComponent('toggle-grab-control', {
+AFRAME.registerComponent('toggle-grab-control', {
              init: function () {
                  const controller = this.el; // このコンポーネントがアタッチされるコントローラーエンティティ
                  const targetFeather = document.querySelector('#feather');
@@ -148,4 +147,5 @@ AFRAME.registerComponent('wand-light-control', {
 </script>
 </body>
 </html>
+
 
