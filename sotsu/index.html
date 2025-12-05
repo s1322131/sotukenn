@@ -145,7 +145,40 @@ AFRAME.registerComponent('toggle-grab-control', {
              }
          });
 </script>
+
+         <script>
+                  AFRAME.registerComponent('color-feedback', {
+                    init: function () {
+                      const el = this.el;
+                  
+                      // オリジナル色を保持
+                      const originalColor = el.getAttribute('material').color;
+                  
+                      // 近づいた（hover start）
+                      el.addEventListener('hover-start', () => {
+                        el.setAttribute('color', '#33ccff');
+                      });
+                  
+                      // 離れた（hover end）
+                      el.addEventListener('hover-end', () => {
+                        el.setAttribute('color', originalColor);
+                      });
+                  
+                      // 掴んだ（grab start）
+                      el.addEventListener('grab-start', () => {
+                        el.setAttribute('color', '#ff4444');
+                      });
+                  
+                      // 離した（grab end）
+                      el.addEventListener('grab-end', () => {
+                        el.setAttribute('color', originalColor);
+                      });
+                    }
+                  });
+         </script>
+
 </body>
 </html>
+
 
 
