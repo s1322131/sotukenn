@@ -60,16 +60,17 @@
 
     <!-- 右コントローラ -->
     <a-entity id="rightController"
-              laser-controls="hand: right"
-              oculus-touch-controls="hand: right; model: false"
-              vive-controls="hand: right"
-              windows-motion-controls="hand: right"
-              daydream-controls="hand: right"
-              gearvr-controls="hand: right"
-              super-hands
-              toggle-grab-control
-              sphere-collider="objects: .clickable"
-              raycaster="objects: .grabbable, .hoverable; far: 15">
+        laser-controls="hand: right"
+        oculus-touch-controls="hand: right; model: false"
+        vive-controls="hand: right"
+        windows-motion-controls="hand: right"
+        daydream-controls="hand: right"
+        gearvr-controls="hand: right"
+        super-hands
+        toggle-grab-control
+        sphere-collider="objects: .clickable, .grabbable, .hoverable"
+        raycaster="objects: .clickable, .grabbable, .hoverable; far: 15">
+
 
       <!-- 杖 -->
       <a-entity id="wand"
@@ -228,6 +229,7 @@
 
 </body>
 </html>
+
 
 
 
