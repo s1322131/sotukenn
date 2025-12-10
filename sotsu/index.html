@@ -91,18 +91,29 @@
     <a-entity id="feather"
               class="interactable grab-target"
               gltf-model="hane.glb"
-              position="-3 -2 -3"
+              position="-2 -2 -3"
               rotation="0 90 0"
               scale="0.3 0.3 0.3">
     </a-entity>
 
     <!-- ほうき（引き寄せられる） -->
     <a-entity id="houki"
-              class="interactable houki-target"
-              gltf-model="houki1.glb"
-              position="10 -3 -3"
-              scale="1 1 1">
+          class="interactable houki-target"
+          gltf-model="houki1.glb"
+          position="10 -3 -3"
+          subtitle-houki
+          scale="1 1 1">
     </a-entity>
+    
+    <!-- 字幕表示用 -->
+    <a-plane id="houkiSubtitle"
+             position="0 2 -3"
+             width="4"
+             height="2"
+             visible="false"
+             material="transparent:true; shader:flat">
+    </a-plane>
+
 
     <!-- ライト -->
     <a-entity light="type: ambient; intensity: 0.8"></a-entity>
@@ -179,29 +190,56 @@
 
   <!-- attract-houki（ほうきを引き寄せる） -->
   <script>
-    AFRAME.registerComponent('attract-houki', {
+        AFRAME.registerComponent('subtitle-houki', {
       init: function () {
-        const controller = this.el;
-
-        controller.addEventListener("triggerdown", () => {
+        const houki = this.el;
+        const subtitle = document.querySelector('#houkiSubtitle');
+        const controller = document.querySelector('#rightController');
+    
+        let step = 0; // 0:何もしてない, 1:字幕1中, 2:字幕2中, 3:移動準備OK
+    
+        // ★ マウスオーバー（レイが当たる）で字幕①表示
+        houki.addEventListener('raycaster-intersected', () => {
+          if (step === 0) {
+            subtitle.setAttribute('src', 'houki1.png');
+            subtitle.setAttribute('visible', true);
+            step = 1;
+          }
+        });
+    
+        // ★ トリガー押したときの動き
+        controller.addEventListener('triggerdown', () => {
+          // ほうきにレイが当たっているかチェック
           const hits = controller.components.raycaster.intersections;
-          if (!hits.length) return;
-
-          const target = hits[0].object.el;
-          if (!target.classList.contains("houki-target")) return;
-
-          const ctrlPos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(ctrlPos);
-
-          target.setAttribute("animation__attract", {
-            property: "position",
-            to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
-            dur: 600,
-            easing: "easeOutQuad"
-          });
+          if (!hits.length || hits[0].object.el !== houki) return;
+    
+          // ▼ パターン
+          if (step === 1) {
+            // 字幕① → 字幕②
+            subtitle.setAttribute('src', 'houki2.png');
+            step = 2;
+    
+          } else if (step === 2) {
+            // 字幕非表示
+            subtitle.setAttribute('visible', false);
+    
+            // ほうき移動
+            const ctrlPos = new THREE.Vector3();
+            controller.object3D.getWorldPosition(ctrlPos);
+    
+            houki.setAttribute("animation__attract", {
+              property: "position",
+              to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+              dur: 2000,
+              easing: "easeOutQuad"
+            });
+    
+            step = 3;
+          }
         });
       }
     });
+
   </script>
 
   <!-- PNG切り替え（字幕）※ VR対応 -->
@@ -246,6 +284,7 @@
 
 </body>
 </html>
+
 
 
 
