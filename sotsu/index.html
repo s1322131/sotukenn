@@ -14,27 +14,27 @@
 <body>
   <a-scene vr-mode-ui="enabled: true" wand-light-control physics="debug: true">
 
-    <!-- 字幕（interactable 追加） -->
+    <!-- 字幕 -->
     <a-plane id="subtitle"
-             src="teacher1.png"
-             position="0 -5 -15"
-             rotation="0 0 90"
-             width="8"
-             height="5"
-             transparent="true"
-             shader="flat"
-             class="interactable"
-             subtitle-switcher>
+      src="teacher1.png"
+      position="0 -5 -15"
+      rotation="0 0 90"
+      width="8"
+      height="5"
+      transparent="true"
+      shader="flat"
+      class="interactable"
+      subtitle-switcher>
     </a-plane>
 
-    <!-- ★ リセットボタン -->
+    <!-- リセットボタン -->
     <a-plane id="resetBtn"
-             position="0 5 -12"
-             width="4"
-             height="1.5"
-             color="#696969"
-             class="interactable"
-             reset-scene>
+      position="0 3 -12"
+      width="2"
+      height="1"
+      color="#ff6666"
+      class="interactable"
+      reset-scene>
       <a-text value="RESET" align="center" color="#fff" position="0 0 0.1"></a-text>
     </a-plane>
 
@@ -46,73 +46,72 @@
 
     <!-- 先生モデル -->
     <a-entity id="teacher"
-              gltf-model="teacher11.glb"
-              animation-mixer
-              position="0 -20 -20"
-              rotation="0 10 0"
-              scale="14 14 14">
+      gltf-model="teacher11.glb"
+      animation-mixer
+      position="0 -20 -20"
+      rotation="0 10 0"
+      scale="14 14 14">
     </a-entity>
 
     <!-- 右コントローラ -->
     <a-entity id="rightController"
-        laser-controls="hand: right"
-        raycaster="objects: .interactable; lineColor: red; far: 20"
-        simple-grab
-        class="interactable"
-        attract-houki>
+      laser-controls="hand: right"
+      raycaster="objects: .interactable; lineColor: red; far: 20"
+      class="interactable"
+      simple-grab
+      attract-houki>
 
       <!-- 杖 -->
       <a-entity id="wand"
-                gltf-model="tsue2.glb"
-                scale="0.2 0.2 0.2"
-                position="0 0 0"
-                rotation="150 121 180">
+        gltf-model="tsue2.glb"
+        scale="0.2 0.2 0.2"
+        position="0 0 0"
+        rotation="150 121 180">
 
-        <!-- 光球 -->
+        <!-- 杖の光球 -->
         <a-sphere id="wandGlow"
-                  radius="0.6"
-                  color="#88ccff"
-                  emissive="#88ccff"
-                  emissiveIntensity="2"
-                  visible="false"
-                  position="-5 -3 -0.5">
+          radius="0.6"
+          color="#88ccff"
+          emissive="#88ccff"
+          emissiveIntensity="2"
+          visible="false"
+          position="-5 -3 -0.5">
         </a-sphere>
 
         <!-- 杖ライト -->
         <a-entity id="wandLight"
-                  light="type: point; intensity: 0; distance: 4; decay: 2"
-                  position="-5 -3 -0.5">
+          light="type: point; intensity: 0; distance: 4; decay: 2"
+          position="-5 -3 -0.5">
         </a-entity>
 
       </a-entity>
     </a-entity>
 
-    <!-- 羽（掴める） -->
+    <!-- 羽 -->
     <a-entity id="feather"
-              class="interactable grab-target"
-              gltf-model="hane.glb"
-              position="0 -1 -3"
-              rotation="0 90 0"
-              scale="0.3 0.3 0.3">
+      class="interactable grab-target"
+      gltf-model="hane.glb"
+      position="-2 -2 -3"
+      rotation="0 90 0"
+      scale="0.3 0.3 0.3">
     </a-entity>
 
-    <!-- ほうき（字幕 → 吸い寄せ） -->
+    <!-- ほうき -->
     <a-entity id="houki"
-          class="interactable houki-target"
-          gltf-model="houki1.glb"
-          position="10 -3 -3"
-          subtitle-houki
-          scale="1 1 1">
+      class="interactable houki-target"
+      gltf-model="houki1.glb"
+      position="10 -3 -3"
+      subtitle-houki
+      scale="1 1 1">
     </a-entity>
-    
-    <!-- 字幕表示用（ほうき） -->
+
+    <!-- 字幕表示用 -->
     <a-plane id="houkiSubtitle"
-             position="10 2 -3"
-             rotation="0 90 0"
-             width="4"
-             height="2"
-             visible="false"
-             material="transparent:true; shader:flat">
+      position="0 2 -3"
+      width="4"
+      height="2"
+      visible="false"
+      material="transparent:true; shader:flat">
     </a-plane>
 
     <!-- ライト -->
@@ -120,6 +119,7 @@
     <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
 
   </a-scene>
+
 
   <!-- 杖ライト制御（ダブルトリガー） -->
   <script>
@@ -146,36 +146,34 @@
     });
   </script>
 
-  <!-- simple-grab（羽が1回で浮く） -->
+
+  <!-- simple-grab -->
   <script>
     AFRAME.registerComponent('simple-grab', {
       init: function () {
         const controller = this.el;
         let grabbingEl = null;
-    
+
         controller.addEventListener('triggerdown', () => {
-          setTimeout(() => { // ← 重要
-            const hits = controller.components.raycaster.intersections;
-            if (!hits || hits.length === 0) return;
-    
-            const target = hits[0].object.el;
-            if (!target.classList.contains("grab-target")) return;
-    
-            grabbingEl = target;
-    
-            const ctrlPos = new THREE.Vector3();
-            controller.object3D.getWorldPosition(ctrlPos);
-    
-            // ふわっと浮くアニメ
-            target.setAttribute("animation__lift", {
-              property: "position",
-              to: `${ctrlPos.x} ${ctrlPos.y + 0.7} ${ctrlPos.z - 0.5}`,
-              dur: 1000,
-              easing: "easeOutQuad"
-            });
-          }, 0);
+          const hits = controller.components.raycaster.intersections;
+          if (!hits || hits.length === 0) return;
+
+          const target = hits[0].object.el;
+          if (!target.classList.contains("grab-target")) return;
+
+          grabbingEl = target;
+
+          const ctrlPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(ctrlPos);
+
+          target.setAttribute("animation__lift", {
+            property: "position",
+            to: `${ctrlPos.x} ${ctrlPos.y + 0.5} ${ctrlPos.z - 0.5}`,
+            dur: 2000,
+            easing: "easeOutQuad"
+          });
         });
-    
+
         controller.addEventListener('triggerup', () => {
           if (!grabbingEl) return;
           grabbingEl.removeAttribute("animation__lift");
@@ -185,47 +183,46 @@
     });
   </script>
 
-  <!-- subtitle-houki（ほうき字幕 → 移動） -->
+
+  <!-- subtitle-houki -->
   <script>
     AFRAME.registerComponent('subtitle-houki', {
       init: function () {
         const houki = this.el;
         const subtitle = document.querySelector('#houkiSubtitle');
         const controller = document.querySelector('#rightController');
-    
+
         let step = 0;
-    
-        // 射線がほうきに当たった瞬間
-        controller.addEventListener('raycaster-intersection', evt => {
-          const targets = evt.detail.els;
-          if (targets.includes(houki) && step === 0) {
+
+        houki.addEventListener('raycaster-intersected', () => {
+          if (step === 0) {
             subtitle.setAttribute('src', 'houki1.png');
             subtitle.setAttribute('visible', true);
             step = 1;
           }
         });
-    
+
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
           if (!hits.length || hits[0].object.el !== houki) return;
-    
+
           if (step === 1) {
             subtitle.setAttribute('src', 'houki2.png');
             step = 2;
-    
+
           } else if (step === 2) {
             subtitle.setAttribute('visible', false);
-    
+
             const ctrlPos = new THREE.Vector3();
             controller.object3D.getWorldPosition(ctrlPos);
-    
+
             houki.setAttribute("animation__attract", {
               property: "position",
               to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
               dur: 2000,
               easing: "easeOutQuad"
             });
-    
+
             step = 3;
           }
         });
@@ -233,32 +230,35 @@
     });
   </script>
 
-  <!-- PNG切り替え（teacher字幕） -->
+
+  <!-- PNG切り替え -->
   <script>
     AFRAME.registerComponent('subtitle-switcher', {
       init: function () {
         const el = this.el;
-        const list = ['teacher1.png', 'teacher2.png'];
-        let i = 0;
+        const subtitles = ['teacher1.png', 'teacher2.png'];
+        let index = 0;
 
         el.addEventListener('click', () => {
-          i = (i + 1) % list.length;
-          el.setAttribute('src', list[i]);
+          index = (index + 1) % subtitles.length;
+          el.setAttribute('src', subtitles[index]);
         });
 
         el.addEventListener('triggerdown', () => {
-          i = (i + 1) % list.length;
-          el.setAttribute('src', list[i]);
+          index = (index + 1) % subtitles.length;
+          el.setAttribute('src', subtitles[index]);
         });
       }
     });
   </script>
+
 
   <!-- リセット -->
   <script>
     AFRAME.registerComponent('reset-scene', {
       init: function () {
         const el = this.el;
+
         el.addEventListener('click', () => location.reload());
         el.addEventListener('triggerdown', () => location.reload());
       }
