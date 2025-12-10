@@ -93,7 +93,8 @@
       gltf-model="hane.glb"
       position="-2 -1 -3"
       rotation="0 90 0"
-      scale="0.3 0.3 0.3">
+      scale="0.3 0.3 0.3"
+      dynamic-body>
     </a-entity>
 
     <!-- ほうき -->
@@ -108,7 +109,7 @@
     <!-- 字幕表示用 -->
     <a-plane id="houkiSubtitle"
       position="10 2 -2"
-      rotation="0 90 0"
+      rotation="0 0 90"
       width="4"
       height="2"
       visible="false"
@@ -150,38 +151,37 @@
 
   <!-- simple-grab -->
   <script>
-    AFRAME.registerComponent('simple-grab', {
-      init: function () {
-        const controller = this.el;
-        let grabbingEl = null;
-
-        controller.addEventListener('triggerdown', () => {
-          const hits = controller.components.raycaster.intersections;
-          if (!hits || hits.length === 0) return;
-
-          const target = hits[0].object.el;
-          if (!target.classList.contains("grab-target")) return;
-
-          grabbingEl = target;
-
-          const ctrlPos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(ctrlPos);
-
-          target.setAttribute("animation__lift", {
-            property: "position",
-            to: `${ctrlPos.x} ${ctrlPos.y + 0.5} ${ctrlPos.z - 0.5}`,
-            dur: 2000,
-            easing: "easeOutQuad"
-          });
-        });
-
-        controller.addEventListener('triggerup', () => {
-          if (!grabbingEl) return;
-          grabbingEl.removeAttribute("animation__lift");
-          grabbingEl = null;
-        });
-      }
-    });
+  AFRAME.registerComponent('simple-grab', {
+    init: function () {
+      const controller = this.el;
+      let grabbingEl = null;
+  
+      controller.addEventListener('triggerdown', () => {
+        const hits = controller.components.raycaster.intersections;
+        if (!hits || hits.length === 0) return;
+  
+        const target = hits[0].object.el;
+        if (!target.classList.contains("grab-target")) return;
+  
+        grabbingEl = target;
+  
+        // 物理をONにして、上に持ち上げる
+        target.body.velocity.set(0, 3, 0);   // 真上へフワッと上昇
+        target.body.angularVelocity.set(0, 0, 0);
+  
+        // 手前へ吸われないように
+        const pos = target.getAttribute("position");
+        target.setAttribute("position", `${pos.x} ${pos.y} ${pos.z}`);
+      });
+  
+      controller.addEventListener('triggerup', () => {
+        if (!grabbingEl) return;
+  
+        // 手を離したときはそのまま物理で落ちる
+        grabbingEl = null;
+      });
+    }
+  });
   </script>
 
 
@@ -268,6 +268,7 @@
 
 </body>
 </html>
+
 
 
 
