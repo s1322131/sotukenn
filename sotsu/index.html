@@ -27,12 +27,12 @@
              subtitle-switcher>
     </a-plane>
 
-    <!-- ★ リセットボタン（interactable 追加） -->
+    <!-- ★ リセットボタン -->
     <a-plane id="resetBtn"
-             position="0 3 -12"
+             position="0 5 -12"
              width="4"
              height="1.5"
-             color="#ff6666"
+             color="#696969"
              class="interactable"
              reset-scene>
       <a-text value="RESET" align="center" color="#fff" position="0 0 0.1"></a-text>
@@ -57,8 +57,8 @@
     <a-entity id="rightController"
         laser-controls="hand: right"
         raycaster="objects: .interactable; lineColor: red; far: 20"
-        class="interactable"
         simple-grab
+        class="interactable"
         attract-houki>
 
       <!-- 杖 -->
@@ -68,7 +68,7 @@
                 position="0 0 0"
                 rotation="150 121 180">
 
-        <!-- 杖の光球 -->
+        <!-- 光球 -->
         <a-sphere id="wandGlow"
                   radius="0.6"
                   color="#88ccff"
@@ -96,17 +96,7 @@
               scale="0.3 0.3 0.3">
     </a-entity>
 
-    <!-- テスト用ボックス（掴める） -->
-    <!--<a-box id="testBox"
-           class="interactable grab-target"
-           color="#ff8888"
-           position="-5 0 -3"
-           width="0.9"
-           height="0.5"
-           depth="0.5">
-    </a-box> -->
-
-    <!-- ほうき（引き寄せられる） -->
+    <!-- ほうき（字幕 → 吸い寄せ） -->
     <a-entity id="houki"
           class="interactable houki-target"
           gltf-model="houki1.glb"
@@ -115,7 +105,7 @@
           scale="1 1 1">
     </a-entity>
     
-    <!-- 字幕表示用 -->
+    <!-- 字幕表示用（ほうき） -->
     <a-plane id="houkiSubtitle"
              position="10 2 -3"
              rotation="0 90 0"
@@ -145,7 +135,6 @@
 
         controller.addEventListener('triggerdown', () => {
           const now = performance.now();
-
           if (now - lastClick < threshold) {
             on = !on;
             glow.setAttribute('visible', on);
@@ -157,7 +146,7 @@
     });
   </script>
 
-  <!-- simple-grab（掴む） -->
+  <!-- simple-grab（羽が1回で浮く） -->
   <script>
     AFRAME.registerComponent('simple-grab', {
       init: function () {
@@ -165,31 +154,30 @@
         let grabbingEl = null;
     
         controller.addEventListener('triggerdown', () => {
-          const hits = controller.components.raycaster.intersections;
-          if (!hits || hits.length === 0) return;
+          setTimeout(() => { // ← 重要
+            const hits = controller.components.raycaster.intersections;
+            if (!hits || hits.length === 0) return;
     
-          const target = hits[0].object.el;
-          if (!target.classList.contains("grab-target")) return;
+            const target = hits[0].object.el;
+            if (!target.classList.contains("grab-target")) return;
     
-          grabbingEl = target;
+            grabbingEl = target;
     
-          // コントローラの前の位置を取得
-          const ctrlPos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(ctrlPos);
+            const ctrlPos = new THREE.Vector3();
+            controller.object3D.getWorldPosition(ctrlPos);
     
-          // 羽を少し浮かせる
-          target.setAttribute("animation__lift", {
-            property: "position",
-            to: `${ctrlPos.x} ${ctrlPos.y + 0.5} ${ctrlPos.z - 0.5}`,
-            dur: 2000,
-            easing: "easeOutQuad"
-          });
+            // ふわっと浮くアニメ
+            target.setAttribute("animation__lift", {
+              property: "position",
+              to: `${ctrlPos.x} ${ctrlPos.y + 0.7} ${ctrlPos.z - 0.5}`,
+              dur: 1000,
+              easing: "easeOutQuad"
+            });
+          }, 0);
         });
     
         controller.addEventListener('triggerup', () => {
           if (!grabbingEl) return;
-    
-          // 置くときはアニメ消すだけ
           grabbingEl.removeAttribute("animation__lift");
           grabbingEl = null;
         });
@@ -197,7 +185,7 @@
     });
   </script>
 
-  <!-- attract-houki（ほうきを引き寄せる） -->
+  <!-- subtitle-houki（ほうき字幕 → 移動） -->
   <script>
     AFRAME.registerComponent('subtitle-houki', {
       init: function () {
@@ -205,34 +193,29 @@
         const subtitle = document.querySelector('#houkiSubtitle');
         const controller = document.querySelector('#rightController');
     
-        let step = 0; // 0:何もしてない, 1:字幕1中, 2:字幕2中, 3:移動準備OK
+        let step = 0;
     
-        // ★ マウスオーバー（レイが当たる）で字幕①表示
-        houki.addEventListener('raycaster-intersected', () => {
-          if (step === 0) {
+        // 射線がほうきに当たった瞬間
+        controller.addEventListener('raycaster-intersection', evt => {
+          const targets = evt.detail.els;
+          if (targets.includes(houki) && step === 0) {
             subtitle.setAttribute('src', 'houki1.png');
             subtitle.setAttribute('visible', true);
             step = 1;
           }
         });
     
-        // ★ トリガー押したときの動き
         controller.addEventListener('triggerdown', () => {
-          // ほうきにレイが当たっているかチェック
           const hits = controller.components.raycaster.intersections;
           if (!hits.length || hits[0].object.el !== houki) return;
     
-          // ▼ パターン
           if (step === 1) {
-            // 字幕① → 字幕②
             subtitle.setAttribute('src', 'houki2.png');
             step = 2;
     
           } else if (step === 2) {
-            // 字幕非表示
             subtitle.setAttribute('visible', false);
     
-            // ほうき移動
             const ctrlPos = new THREE.Vector3();
             controller.object3D.getWorldPosition(ctrlPos);
     
@@ -248,52 +231,39 @@
         });
       }
     });
-
   </script>
 
-  <!-- PNG切り替え（字幕）※ VR対応 -->
+  <!-- PNG切り替え（teacher字幕） -->
   <script>
     AFRAME.registerComponent('subtitle-switcher', {
       init: function () {
         const el = this.el;
-        const subtitles = ['teacher1.png', 'teacher2.png'];
-        let index = 0;
+        const list = ['teacher1.png', 'teacher2.png'];
+        let i = 0;
 
-        // マウスクリック（VR外）
         el.addEventListener('click', () => {
-          index = (index + 1) % subtitles.length;
-          el.setAttribute('src', subtitles[index]);
+          i = (i + 1) % list.length;
+          el.setAttribute('src', list[i]);
         });
 
-        // トリガー（VR内）
         el.addEventListener('triggerdown', () => {
-          index = (index + 1) % subtitles.length;
-          el.setAttribute('src', subtitles[index]);
+          i = (i + 1) % list.length;
+          el.setAttribute('src', list[i]);
         });
       }
     });
   </script>
 
-  <!-- ★ リセット機能（VR対応） -->
+  <!-- リセット -->
   <script>
     AFRAME.registerComponent('reset-scene', {
       init: function () {
         const el = this.el;
-
-        el.addEventListener('click', () => {
-          location.reload();
-        });
-
-        el.addEventListener('triggerdown', () => {
-          location.reload();
-        });
+        el.addEventListener('click', () => location.reload());
+        el.addEventListener('triggerdown', () => location.reload());
       }
     });
   </script>
 
 </body>
 </html>
-
-
-
-
