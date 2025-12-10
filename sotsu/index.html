@@ -97,7 +97,7 @@
 
     <!-- 羽（掴める） -->
     <a-entity id="feather"
-              class="interactable grab-target"
+              class="interactable feather-target"
               gltf-model="hane.glb"
               position="0 -2 -3"
               rotation="0 90 0"
@@ -115,9 +115,10 @@
 
     <!-- 字幕表示用（ほうき用） -->
     <a-plane id="houkiSubtitle"
-             position="0 2 -3"
+             position="10 2 -3"
+             rotation="0 90 0"
              width="4"
-             height="2"
+             height="2.5"
              visible="false"
              material="transparent:true; shader:flat">
     </a-plane>
@@ -283,5 +284,6 @@
 
 </body>
 </html>
+
 
 
