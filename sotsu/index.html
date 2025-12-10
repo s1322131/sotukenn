@@ -168,6 +168,9 @@
         const controller = this.el;
         let grabbingEl = null;
   
+        // コントローラーから羽までの「距離ベクトル」
+        let offset = new THREE.Vector3();
+  
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
           if (!hits || hits.length === 0) return;
@@ -177,17 +180,27 @@
   
           grabbingEl = target;
   
-          // 重力を無効化して浮かせる
+          // 重力オフ
           if (grabbingEl.body) {
             grabbingEl.body.mass = 0;
             grabbingEl.body.updateMassProperties();
           }
+  
+          // 掴んだ瞬間のコントローラ位置
+          const ctrlPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(ctrlPos);
+  
+          // 羽の現在位置
+          const hanePos = new THREE.Vector3();
+          grabbingEl.object3D.getWorldPosition(hanePos);
+  
+          // コントローラ → 羽 の距離ベクトル（これを維持）
+          offset.copy(hanePos).sub(ctrlPos);
         });
   
         controller.addEventListener('triggerup', () => {
           if (!grabbingEl) return;
   
-          // 重力を戻す
           if (grabbingEl.body) {
             grabbingEl.body.mass = 1;
             grabbingEl.body.updateMassProperties();
@@ -196,20 +209,19 @@
           grabbingEl = null;
         });
   
-        // 毎フレーム呼ばれる：レヴィオーサ風ふわっと追従
+        // レヴィオーサ風ふわっと追従（距離維持）
         this.tick = function () {
           if (!grabbingEl) return;
   
-          // コントローラの位置（目標地点）
-          const targetPos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(targetPos);
+          // コントローラー位置
+          const ctrlPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(ctrlPos);
   
-          targetPos.y += 0.3; // 少し浮かせる（レヴィオーサ感）
+          // 羽が来てほしい位置（距離ベクトルを足す）
+          const targetPos = new THREE.Vector3().copy(ctrlPos).add(offset);
   
-          // 現在位置
+          // ふわっと追従
           const currentPos = grabbingEl.object3D.position;
-  
-          // lerpでふわっと追従（0.15は追従速度）
           currentPos.lerp(targetPos, 0.15);
         };
       }
@@ -345,6 +357,7 @@
 
 </body>
 </html>
+
 
 
 
