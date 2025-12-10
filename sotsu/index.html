@@ -163,56 +163,62 @@
 
   <!-- simple-grab -->
   <script>
-  AFRAME.registerComponent('simple-grab', {
-    init: function () {
-      const controller = this.el;
-      let grabbingEl = null;
-  
-      let offset = new THREE.Vector3();
-  
-      controller.addEventListener('triggerdown', () => {
-        const hits = controller.components.raycaster.intersections;
-        if (!hits || hits.length === 0) return;
-  
-        const target = hits[0].object.el;
-        if (!target.classList.contains("grab-target")) return;
-  
-        grabbingEl = target;
-  
-        // 物理エンジン無効化（暴れ防止）
-        grabbingEl.setAttribute("dynamic-body", "mass:0; type: kinematic");
-  
-        const ctrlPos = new THREE.Vector3();
-        controller.object3D.getWorldPosition(ctrlPos);
-  
-        const hanePos = new THREE.Vector3();
-        grabbingEl.object3D.getWorldPosition(hanePos);
-  
-        offset.copy(hanePos).sub(ctrlPos);
-      });
-  
-      controller.addEventListener('triggerup', () => {
-        if (!grabbingEl) return;
-  
-        // 物理に戻す
-        grabbingEl.setAttribute("dynamic-body", "mass:1; type: dynamic");
-  
-        grabbingEl = null;
-      });
-  
-      this.tick = function () {
-        if (!grabbingEl) return;
-  
-        const ctrlPos = new THREE.Vector3();
-        controller.object3D.getWorldPosition(ctrlPos);
-  
-        const targetPos = new THREE.Vector3().copy(ctrlPos).add(offset);
-  
-        grabbingEl.object3D.position.lerp(targetPos, 0.15);
-      };
-    }
-  });
+    AFRAME.registerComponent('simple-grab', {
+      init: function () {
+        const controller = this.el;
+        let grabbingEl = null;
+    
+        let offset = new THREE.Vector3();
+    
+        controller.addEventListener('triggerdown', () => {
+          const hits = controller.components.raycaster.intersections;
+          if (!hits || hits.length === 0) return;
+    
+          const target = hits[0].object.el;
+          if (!target.classList.contains("grab-target")) return;
+    
+          grabbingEl = target;
+    
+          // 物理エンジン無効化（暴れ防止）
+          grabbingEl.setAttribute("dynamic-body", "mass:0; type: kinematic");
+    
+          const ctrlPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(ctrlPos);
+    
+          const hanePos = new THREE.Vector3();
+          grabbingEl.object3D.getWorldPosition(hanePos);
+    
+          offset.copy(hanePos).sub(ctrlPos);
+        });
+    
+        controller.addEventListener('triggerup', () => {
+          if (!grabbingEl) return;
+    
+          // 物理に戻す
+          grabbingEl.setAttribute("dynamic-body", "mass:1; type: dynamic");
+    
+          grabbingEl = null;
+        });
+    
+        this.tick = function () {
+          if (!grabbingEl) return;
+    
+          const ctrlPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(ctrlPos);
+    
+          // 上下(Y)だけ振れ幅を大きくする
+          const amplifiedOffset = offset.clone();
+          amplifiedOffset.y *= 2; // 上下2倍
+    
+          const targetPos = new THREE.Vector3().copy(ctrlPos).add(amplifiedOffset);
+    
+          // lerpで滑らかに追従（追従スピードを0.25に少し早め）
+          grabbingEl.object3D.position.lerp(targetPos, 0.25);
+        };
+      }
+    });
   </script>
+
 
 
   <!-- subtitle-houki -->
@@ -343,6 +349,7 @@
 
 </body>
 </html>
+
 
 
 
