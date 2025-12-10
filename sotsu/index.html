@@ -28,15 +28,28 @@
     </a-plane>
 
     <!-- ★ リセットボタン（interactable 追加） -->
-    <a-plane id="resetBtn"
-             position="0 3 -12"
-             width="2"
-             height="1"
-             color="#ff6666"
-             class="interactable"
-             reset-scene>
-      <a-text value="RESET" align="center" color="#fff" position="0 0 0.1"></a-text>
-    </a-plane>
+    <a-entity id="reset-btn"
+      geometry="primitive: plane; width: 0.4; height: 0.12"
+      material="color: #111; opacity: 0.6; transparent: true"
+      position="0 1.2 -1"
+      class="clickable"
+      >
+      <a-text 
+        value="Reset"
+        color="#ddd"
+        align="center"
+        width="1.5"
+        position="0 0 0.01">
+      </a-text>
+  
+      <!-- 薄い光の縁（魔法感）-->
+      <a-entity
+        geometry="primitive: plane; width: 0.42; height: 0.14"
+        material="color: #888; opacity: 0.15; transparent: true"
+        position="0 0 -0.005">
+      </a-entity>
+    </a-entity>
+
 
     <!-- 背景 -->
     <a-sky src="back.png" rotation="0 -90 0"></a-sky>
@@ -285,6 +298,7 @@
 
 </body>
 </html>
+
 
 
 
