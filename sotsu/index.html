@@ -14,7 +14,7 @@
 <body>
   <a-scene vr-mode-ui="enabled: true" wand-light-control physics="debug: true">
 
-    <!-- 字幕 -->
+    <!-- 字幕（interactable 追加） -->
     <a-plane id="subtitle"
              src="teacher1.png"
              position="0 -5 -15"
@@ -23,17 +23,17 @@
              height="5"
              transparent="true"
              shader="flat"
-             class="clickable"
+             class="interactable"
              subtitle-switcher>
     </a-plane>
 
-    <!-- ★ リセットボタン -->
+    <!-- ★ リセットボタン（interactable 追加） -->
     <a-plane id="resetBtn"
-             position="0 -3 -12"
+             position="0 3 -12"
              width="4"
              height="1.5"
              color="#ff6666"
-             class="clickable"
+             class="interactable"
              reset-scene>
       <a-text value="RESET" align="center" color="#fff" position="0 0 0.1"></a-text>
     </a-plane>
@@ -57,11 +57,10 @@
     <a-entity id="rightController"
         laser-controls="hand: right"
         raycaster="objects: .interactable; lineColor: red; far: 20"
-      　class="clickable interactable"
+        class="interactable"
         simple-grab
-        attract-houki
-        >
-      
+        attract-houki>
+
       <!-- 杖 -->
       <a-entity id="wand"
                 gltf-model="tsue2.glb"
@@ -87,7 +86,6 @@
 
       </a-entity>
     </a-entity>
-
 
     <!-- 羽（掴める） -->
     <a-entity id="feather"
@@ -116,13 +114,11 @@
               scale="1 1 1">
     </a-entity>
 
-
     <!-- ライト -->
     <a-entity light="type: ambient; intensity: 0.8"></a-entity>
     <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
 
   </a-scene>
-
 
   <!-- 杖ライト制御（ダブルトリガー） -->
   <script>
@@ -149,7 +145,6 @@
       }
     });
   </script>
-
 
   <!-- simple-grab（掴む） -->
   <script>
@@ -186,7 +181,6 @@
     });
   </script>
 
-
   <!-- attract-houki（ほうきを引き寄せる） -->
   <script>
     AFRAME.registerComponent('attract-houki', {
@@ -198,7 +192,6 @@
           if (!hits.length) return;
 
           const target = hits[0].object.el;
-
           if (!target.classList.contains("houki-target")) return;
 
           const ctrlPos = new THREE.Vector3();
@@ -215,8 +208,7 @@
     });
   </script>
 
-
-  <!-- PNG切り替え（字幕） -->
+  <!-- PNG切り替え（字幕）※ VR対応 -->
   <script>
     AFRAME.registerComponent('subtitle-switcher', {
       init: function () {
@@ -224,7 +216,14 @@
         const subtitles = ['teacher1.png', 'teacher2.png'];
         let index = 0;
 
+        // マウスクリック（VR外）
         el.addEventListener('click', () => {
+          index = (index + 1) % subtitles.length;
+          el.setAttribute('src', subtitles[index]);
+        });
+
+        // トリガー（VR内）
+        el.addEventListener('triggerdown', () => {
           index = (index + 1) % subtitles.length;
           el.setAttribute('src', subtitles[index]);
         });
@@ -232,13 +231,18 @@
     });
   </script>
 
-
-  <!-- ★ リセット機能 -->
+  <!-- ★ リセット機能（VR対応） -->
   <script>
     AFRAME.registerComponent('reset-scene', {
       init: function () {
-        this.el.addEventListener('click', () => {
-          location.reload();  // ← 最初からやり直し
+        const el = this.el;
+
+        el.addEventListener('click', () => {
+          location.reload();
+        });
+
+        el.addEventListener('triggerdown', () => {
+          location.reload();
         });
       }
     });
