@@ -152,34 +152,40 @@
       init: function () {
         const controller = this.el;
         let grabbingEl = null;
-
+    
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
           if (!hits || hits.length === 0) return;
-
+    
           const target = hits[0].object.el;
-          if (target.classList.contains("grab-target")) {
-            grabbingEl = target;
-            controller.appendChild(grabbingEl);
-            grabbingEl.setAttribute("position", "0 0 -0.5");
-          }
+          if (!target.classList.contains("grab-target")) return;
+    
+          grabbingEl = target;
+    
+          // コントローラの前の位置を取得
+          const ctrlPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(ctrlPos);
+    
+          // 羽を少し浮かせる
+          target.setAttribute("animation__lift", {
+            property: "position",
+            to: `${ctrlPos.x} ${ctrlPos.y + 0.5} ${ctrlPos.z - 0.5}`,
+            dur: 400,
+            easing: "easeOutQuad"
+          });
         });
-
+    
         controller.addEventListener('triggerup', () => {
           if (!grabbingEl) return;
-
-          const worldPos = new THREE.Vector3();
-          grabbingEl.object3D.getWorldPosition(worldPos);
-
-          controller.sceneEl.appendChild(grabbingEl);
-          grabbingEl.setAttribute("position",
-            `${worldPos.x} ${worldPos.y} ${worldPos.z}`);
-
+    
+          // 置くときはアニメ消すだけ
+          grabbingEl.removeAttribute("animation__lift");
           grabbingEl = null;
         });
       }
     });
-  </script>
+</script>
+
 
   <!-- attract-houki（ほうきを引き寄せる） -->
   <script>
@@ -250,3 +256,4 @@
 
 </body>
 </html>
+
