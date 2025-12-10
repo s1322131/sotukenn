@@ -163,117 +163,103 @@
 
   <!-- simple-grab -->
   <script>
-    AFRAME.registerComponent('simple-grab', {
-      init: function () {
-        const controller = this.el;
-        let grabbingEl = null;
+  AFRAME.registerComponent('simple-grab', {
+    init: function () {
+      const controller = this.el;
+      let grabbingEl = null;
   
-        // コントローラーから羽までの「距離ベクトル」
-        let offset = new THREE.Vector3();
+      let offset = new THREE.Vector3();
   
-        controller.addEventListener('triggerdown', () => {
-          const hits = controller.components.raycaster.intersections;
-          if (!hits || hits.length === 0) return;
+      controller.addEventListener('triggerdown', () => {
+        const hits = controller.components.raycaster.intersections;
+        if (!hits || hits.length === 0) return;
   
-          const target = hits[0].object.el;
-          if (!target.classList.contains("grab-target")) return;
+        const target = hits[0].object.el;
+        if (!target.classList.contains("grab-target")) return;
   
-          grabbingEl = target;
+        grabbingEl = target;
   
-          // 重力オフ
-          if (grabbingEl.body) {
-            grabbingEl.body.mass = 0;
-            grabbingEl.body.updateMassProperties();
-          }
+        // 物理エンジン無効化（暴れ防止）
+        grabbingEl.setAttribute("dynamic-body", "mass:0; type: kinematic");
   
-          // 掴んだ瞬間のコントローラ位置
-          const ctrlPos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(ctrlPos);
+        const ctrlPos = new THREE.Vector3();
+        controller.object3D.getWorldPosition(ctrlPos);
   
-          // 羽の現在位置
-          const hanePos = new THREE.Vector3();
-          grabbingEl.object3D.getWorldPosition(hanePos);
+        const hanePos = new THREE.Vector3();
+        grabbingEl.object3D.getWorldPosition(hanePos);
   
-          // コントローラ → 羽 の距離ベクトル（これを維持）
-          offset.copy(hanePos).sub(ctrlPos);
-        });
+        offset.copy(hanePos).sub(ctrlPos);
+      });
   
-        controller.addEventListener('triggerup', () => {
-          if (!grabbingEl) return;
+      controller.addEventListener('triggerup', () => {
+        if (!grabbingEl) return;
   
-          if (grabbingEl.body) {
-            grabbingEl.body.mass = 1;
-            grabbingEl.body.updateMassProperties();
-          }
+        // 物理に戻す
+        grabbingEl.setAttribute("dynamic-body", "mass:1; type: dynamic");
   
-          grabbingEl = null;
-        });
+        grabbingEl = null;
+      });
   
-        // レヴィオーサ風ふわっと追従（距離維持）
-        this.tick = function () {
-          if (!grabbingEl) return;
+      this.tick = function () {
+        if (!grabbingEl) return;
   
-          // コントローラー位置
-          const ctrlPos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(ctrlPos);
+        const ctrlPos = new THREE.Vector3();
+        controller.object3D.getWorldPosition(ctrlPos);
   
-          // 羽が来てほしい位置（距離ベクトルを足す）
-          const targetPos = new THREE.Vector3().copy(ctrlPos).add(offset);
+        const targetPos = new THREE.Vector3().copy(ctrlPos).add(offset);
   
-          // ふわっと追従
-          const currentPos = grabbingEl.object3D.position;
-          currentPos.lerp(targetPos, 0.15);
-        };
-      }
-    });
+        grabbingEl.object3D.position.lerp(targetPos, 0.15);
+      };
+    }
+  });
   </script>
 
 
   <!-- subtitle-houki -->
   <script>
-    AFRAME.registerComponent('subtitle-houki', {
-      init: function () {
-        const houki = this.el;
-        const subtitle = document.querySelector('#houkiSubtitle');
-        const controller = document.querySelector('#rightController');
-
-        let step = 0;
-
-        houki.addEventListener('raycaster-intersected', () => {
-          if (step === 0) {
-            subtitle.setAttribute('src', 'houki1.png');
-            subtitle.setAttribute('visible', true);
-            step = 1;
-          }
-        });
-
-        controller.addEventListener('triggerdown', () => {
-          const hits = controller.components.raycaster.intersections;
-          if (!hits.length || hits[0].object.el !== houki) return;
-
-          if (step === 1) {
-            subtitle.setAttribute('src', 'houki2.png');
-            step = 2;
-
-          } else if (step === 2) {
-            subtitle.setAttribute('visible', false);
-
-            const ctrlPos = new THREE.Vector3();
-            controller.object3D.getWorldPosition(ctrlPos);
-
-            houki.setAttribute("animation__attract", {
-              property: "position",
-              to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
-              dur: 2000,
-              easing: "easeOutQuad"
-            });
-
-            step = 3;
-          }
-        });
-      }
-    });
-  </script>
+      AFRAME.registerComponent('subtitle-houki', {
+        init: function () {
+          const houki = this.el;
+          const subtitle = document.querySelector('#houkiSubtitle');
+          const controller = document.querySelector('#rightController');
+  
+          let step = 0;
+  
+          houki.addEventListener('raycaster-intersected', () => {
+            if (step === 0) {
+              subtitle.setAttribute('src', 'houki1.png');
+              subtitle.setAttribute('visible', true);
+              step = 1;
+            }
+          });
+  
+          controller.addEventListener('triggerdown', () => {
+            const hits = controller.components.raycaster.intersections;
+            if (!hits.length || hits[0].object.el !== houki) return;
+  
+            if (step === 1) {
+              subtitle.setAttribute('src', 'houki2.png');
+              step = 2;
+  
+            } else if (step === 2) {
+              subtitle.setAttribute('visible', false);
+  
+              const ctrlPos = new THREE.Vector3();
+              controller.object3D.getWorldPosition(ctrlPos);
+  
+              houki.setAttribute("animation__attract", {
+                property: "position",
+                to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+                dur: 2000,
+                easing: "easeOutQuad"
+              });
+  
+              step = 3;
+            }
+          });
+        }
+      });
+    </script>
 
   <script>
     AFRAME.registerComponent('subtitle-hane', {
@@ -357,6 +343,7 @@
 
 </body>
 </html>
+
 
 
 
