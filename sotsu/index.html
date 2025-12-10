@@ -27,6 +27,17 @@
              subtitle-switcher>
     </a-plane>
 
+    <!-- ★ リセットボタン -->
+    <a-plane id="resetBtn"
+             position="0 -3 -12"
+             width="4"
+             height="1.5"
+             color="#ff6666"
+             class="clickable"
+             reset-scene>
+      <a-text value="RESET" align="center" color="#fff" position="0 0 0.1"></a-text>
+    </a-plane>
+
     <!-- 背景 -->
     <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
@@ -46,6 +57,7 @@
     <a-entity id="rightController"
         laser-controls="hand: right"
         raycaster="objects: .interactable; lineColor: red; far: 20"
+      　class="clickable interactable"
         simple-grab
         attract-houki
         >
@@ -139,11 +151,7 @@
   </script>
 
 
-
-
-  <!-- --------------------------------------------------------------
-       1) simple-grab（羽と四角を掴む）superhands無し版
-  -------------------------------------------------------------- -->
+  <!-- simple-grab（掴む） -->
   <script>
     AFRAME.registerComponent('simple-grab', {
       init: function () {
@@ -179,15 +187,11 @@
   </script>
 
 
-
-  <!-- --------------------------------------------------------------
-       2) attract-houki（ほうきを引き寄せる）
-  -------------------------------------------------------------- -->
+  <!-- attract-houki（ほうきを引き寄せる） -->
   <script>
     AFRAME.registerComponent('attract-houki', {
       init: function () {
         const controller = this.el;
-        const scene = controller.sceneEl;
 
         controller.addEventListener("triggerdown", () => {
           const hits = controller.components.raycaster.intersections;
@@ -195,10 +199,8 @@
 
           const target = hits[0].object.el;
 
-          // ほうきだけ反応
           if (!target.classList.contains("houki-target")) return;
 
-          // controller の位置へスーッと移動
           const ctrlPos = new THREE.Vector3();
           controller.object3D.getWorldPosition(ctrlPos);
 
@@ -212,7 +214,6 @@
       }
     });
   </script>
-
 
 
   <!-- PNG切り替え（字幕） -->
@@ -231,10 +232,17 @@
     });
   </script>
 
+
+  <!-- ★ リセット機能 -->
+  <script>
+    AFRAME.registerComponent('reset-scene', {
+      init: function () {
+        this.el.addEventListener('click', () => {
+          location.reload();  // ← 最初からやり直し
+        });
+      }
+    });
+  </script>
+
 </body>
 </html>
-
-
-
-
-
