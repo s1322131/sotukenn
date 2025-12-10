@@ -163,42 +163,44 @@
 
   <!-- simple-grab（掴む） -->
   <script>
-    AFRAME.registerComponent('simple-grab', {
-      init: function () {
-        const controller = this.el;
-        let grabbingEl = null;
-
-        controller.addEventListener('triggerdown', () => {
-          const hits = controller.components.raycaster.intersections;
-          if (!hits || hits.length === 0) return;
-
-          const target = hits[0].object.el;
-          if (!target.classList.contains("grab-target")) return;
-
-          grabbingEl = target;
-
-          // コントローラの位置取得
-          const ctrlPos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(ctrlPos);
-
-          // 羽を浮かせる
-          target.setAttribute("animation__lift", {
-            property: "position",
-            to: `${ctrlPos.x} ${ctrlPos.y + 0.5} ${ctrlPos.z - 0.5}`,
-            dur: 2000,
-            easing: "easeOutQuad"
+      AFRAME.registerComponent('simple-grab', {
+        init: function () {
+          const controller = this.el;
+          let grabbingEl = null;
+      
+          controller.addEventListener('triggerdown', () => {
+            const hits = controller.components.raycaster.intersections;
+            if (!hits || hits.length === 0) return;
+      
+            const target = hits[0].object.el;
+            if (!target.classList.contains("grab-target")) return;
+      
+            grabbingEl = target;
+      
+            // コントローラの前の位置を取得
+            const ctrlPos = new THREE.Vector3();
+            controller.object3D.getWorldPosition(ctrlPos);
+      
+            // 羽を少し浮かせる
+            target.setAttribute("animation__lift", {
+              property: "position",
+              to: `${ctrlPos.x} ${ctrlPos.y + 0.5} ${ctrlPos.z - 0.5}`,
+              dur: 400,
+              easing: "easeOutQuad"
+            });
           });
-        });
-
-        controller.addEventListener('triggerup', () => {
-          if (!grabbingEl) return;
-
-          grabbingEl.removeAttribute("animation__lift");
-          grabbingEl = null;
-        });
-      }
-    });
+      
+          controller.addEventListener('triggerup', () => {
+            if (!grabbingEl) return;
+      
+            // 置くときはアニメ消すだけ
+            grabbingEl.removeAttribute("animation__lift");
+            grabbingEl = null;
+          });
+        }
+      });
   </script>
+
 
   <!-- subtitle-houki（ほうき引き寄せ＋字幕） -->
   <script>
@@ -291,6 +293,7 @@
 
 </body>
 </html>
+
 
 
 
