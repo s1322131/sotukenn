@@ -102,8 +102,8 @@
     <a-plane id="haneSubtitle"
       position="-4 1 -2"
       rotation="0 90 90"
-      width="4"
-      height="0.8"
+      width="8"
+      height="5"
       visible="false"
       material="transparent:true; shader:flat">
     </a-plane>
@@ -121,7 +121,7 @@
     <!-- 字幕表示用 -->
     <a-plane id="houkiSubtitle"
       position="10 2 -2"
-      rotation="90 190 45"
+      rotation="90 190 10"
       width="4"
       height="2"
       visible="false"
@@ -163,58 +163,46 @@
 
   <!-- simple-grab -->
   <script>
-    AFRAME.registerComponent('simple-grab', {
+    AFRAME.registerComponent('subtitle-hane', {
       init: function () {
-        const controller = this.el;
-        let grabbingEl = null;
+        const hane = this.el;
+        const subtitle = document.querySelector('#haneSubtitle');
+        const controller = document.querySelector('#rightController');
     
-        let offset = new THREE.Vector3();
+        let step = 0;
+    
+        hane.addEventListener('raycaster-intersected', () => {
+          if (step === 0) {
+            subtitle.setAttribute('src', 'hane1.png');
+            subtitle.setAttribute('visible', true);
+            step = 1;
+          }
+        });
     
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
-          if (!hits || hits.length === 0) return;
+          if (!hits.length || hits[0].object.el !== hane) return;
     
-          const target = hits[0].object.el;
-          if (!target.classList.contains("grab-target")) return;
+          if (step === 1) {
+            subtitle.setAttribute('src', 'hane2.png');
+            step = 2;
     
-          grabbingEl = target;
+          } else if (step === 2) {
+            subtitle.setAttribute('visible', false);
     
-          // 物理エンジン無効化（暴れ防止）
-          grabbingEl.setAttribute("dynamic-body", "mass:0; type: kinematic");
+            const ctrlPos = new THREE.Vector3();
+            controller.object3D.getWorldPosition(ctrlPos);
     
-          const ctrlPos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(ctrlPos);
+            hane.setAttribute("animation__attract", {
+              property: "position",
+              to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+              dur: 2000,
+              easing: "easeOutQuad"
+            });
     
-          const hanePos = new THREE.Vector3();
-          grabbingEl.object3D.getWorldPosition(hanePos);
-    
-          offset.copy(hanePos).sub(ctrlPos);
+            step = 3;
+          }
         });
-    
-        controller.addEventListener('triggerup', () => {
-          if (!grabbingEl) return;
-    
-          // 物理に戻す
-          grabbingEl.setAttribute("dynamic-body", "mass:1; type: dynamic");
-    
-          grabbingEl = null;
-        });
-    
-        this.tick = function () {
-          if (!grabbingEl) return;
-    
-          const ctrlPos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(ctrlPos);
-    
-          // 上下(Y)だけ振れ幅を大きくする
-          const amplifiedOffset = offset.clone();
-          amplifiedOffset.y *= 2; // 上下2倍
-    
-          const targetPos = new THREE.Vector3().copy(ctrlPos).add(amplifiedOffset);
-    
-          // lerpで滑らかに追従（追従スピードを0.25に少し早め）
-          grabbingEl.object3D.position.lerp(targetPos, 0.25);
-        };
       }
     });
   </script>
@@ -349,6 +337,7 @@
 
 </body>
 </html>
+
 
 
 
