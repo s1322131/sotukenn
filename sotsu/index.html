@@ -109,7 +109,7 @@
     <!-- 字幕表示用 -->
     <a-plane id="houkiSubtitle"
       position="10 2 -2"
-      rotation="0 0 90"
+      rotation="90 0 0"
       width="4"
       height="2"
       visible="false"
@@ -165,24 +165,26 @@
   
         grabbingEl = target;
   
-        // 物理をONにして、上に持ち上げる
-        target.body.velocity.set(0, 3, 0);   // 真上へフワッと上昇
-        target.body.angularVelocity.set(0, 0, 0);
-  
-        // 手前へ吸われないように
-        const pos = target.getAttribute("position");
-        target.setAttribute("position", `${pos.x} ${pos.y} ${pos.z}`);
+        // body がまだない場合 → body-loaded を待ってから実行
+        if (!target.body) {
+          target.addEventListener('body-loaded', () => {
+            target.body.velocity.set(0, 3, 0);
+            target.body.angularVelocity.set(0, 0, 0);
+          }, { once: true });
+        } else {
+          target.body.velocity.set(0, 3, 0);
+          target.body.angularVelocity.set(0, 0, 0);
+        }
       });
   
       controller.addEventListener('triggerup', () => {
-        if (!grabbingEl) return;
-  
-        // 手を離したときはそのまま物理で落ちる
         grabbingEl = null;
+        // あとは physics に任せて自然に落下
       });
     }
   });
   </script>
+
 
 
   <!-- subtitle-houki -->
@@ -268,6 +270,7 @@
 
 </body>
 </html>
+
 
 
 
