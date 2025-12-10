@@ -194,51 +194,50 @@
 
   <!-- subtitle-houki（ほうき引き寄せ＋字幕） -->
   <script>
-    AFRAME.registerComponent('subtitle-houki', {
+        AFRAME.registerComponent('subtitle-houki', {
       init: function () {
         const houki = this.el;
         const subtitle = document.querySelector('#houkiSubtitle');
         const controller = document.querySelector('#rightController');
         let step = 0;
-
+    
         // ★ レイが当たったら字幕①表示
-        houki.addEventListener('raycaster-intersected', () => {
+        houki.addEventListener('mouseenter', () => {
           if (step === 0) {
             subtitle.setAttribute('src', 'houki1.png');
             subtitle.setAttribute('visible', true);
             step = 1;
           }
         });
-
+    
         // ★ トリガーで進行
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
           if (!hits.length || hits[0].object.el !== houki) return;
-
+    
           if (step === 1) {
-            // 字幕① → 字幕②
             subtitle.setAttribute('src', 'houki2.png');
             step = 2;
-
+    
           } else if (step === 2) {
-            // 字幕消し → ほうき移動
             subtitle.setAttribute('visible', false);
-
+    
             const ctrlPos = new THREE.Vector3();
             controller.object3D.getWorldPosition(ctrlPos);
-
+    
             houki.setAttribute("animation__attract", {
               property: "position",
               to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
               dur: 1000,
               easing: "easeOutQuad"
             });
-
+    
             step = 3;
           }
         });
       }
     });
+
   </script>
 
   <!-- PNG切り替え（字幕）※ VR対応 -->
@@ -283,6 +282,7 @@
 
 </body>
 </html>
+
 
 
 
