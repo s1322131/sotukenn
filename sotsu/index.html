@@ -16,57 +16,41 @@
 
     <!-- 字幕（interactable 追加） -->
     <a-plane id="subtitle"
-        src="teacher1.png"
-        position="0 -5 -15"
-        rotation="0 0 90"
-        width="8"
-        height="5"
-        transparent="true"
-        shader="flat"
-        class="interactable"
-        subtitle-switcher
-        material="opacity: 0.92; side: double">
-    
-        <!-- 控えめな縁取り（魔法っぽい青灰色） -->
-        <a-plane
-          width="8.15"
-          height="5.15"
-          position="0 0 -0.01"
-          material="color: #6c7a96; opacity: 0.18; transparent: true">
-        </a-plane>
-    
+             src="teacher1.png"
+             position="0 -5 -15"
+             rotation="0 0 90"
+             width="8"
+             height="5"
+             transparent="true"
+             shader="flat"
+             class="interactable"
+             subtitle-switcher>
     </a-plane>
 
-
     <!-- ★ リセットボタン（interactable 追加） -->
-    <a-entity id="reset-btn"
-      geometry="primitive: plane; width: 0.4; height: 0.12"
-      material="color: #111; opacity: 0.6; transparent: true"
-      position="0 1.2 -1"
-      class="clickable"
-      >
-      <a-text 
-        value="Reset"
-        color="#ddd"
-        align="center"
-        width="1.5"
-        position="0 0 0.01">
+    <a-plane id="resetBtn"
+             position="0 3 -12"
+             width="2"
+             height="1"
+             color="#ff6666"
+             class="interactable"
+             reset-scene>
+      <a-text value="RESET"
+              align="center"
+              color="#fff"
+              position="0 0 0.1">
       </a-text>
-  
-      <!-- 薄い光の縁（魔法感）-->
-      <a-entity
-        geometry="primitive: plane; width: 0.42; height: 0.14"
-        material="color: #888; opacity: 0.15; transparent: true"
-        position="0 0 -0.005">
-      </a-entity>
-    </a-entity>
-
+    </a-plane>
 
     <!-- 背景 -->
     <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
     <!-- カメラ -->
-    <a-entity camera look-controls cursor="rayOrigin: mouse" position="0 -3 0"></a-entity>
+    <a-entity camera
+              look-controls
+              cursor="rayOrigin: mouse"
+              position="0 -3 0">
+    </a-entity>
 
     <!-- 先生モデル -->
     <a-entity id="teacher"
@@ -79,11 +63,11 @@
 
     <!-- 右コントローラ -->
     <a-entity id="rightController"
-        laser-controls="hand: right"
-        raycaster="objects: .interactable; lineColor: red; far: 20"
-        class="interactable"
-        simple-grab
-        attract-houki>
+              laser-controls="hand: right"
+              raycaster="objects: .interactable; lineColor: red; far: 20"
+              class="interactable"
+              simple-grab
+              attract-houki>
 
       <!-- 杖 -->
       <a-entity id="wand"
@@ -113,32 +97,30 @@
 
     <!-- 羽（掴める） -->
     <a-entity id="feather"
-              class="interactable feather-target"
+              class="interactable grab-target"
               gltf-model="hane.glb"
-              position="-2 -1 -3"
+              position="-2 -2 -3"
               rotation="0 90 0"
               scale="0.3 0.3 0.3">
     </a-entity>
 
     <!-- ほうき（引き寄せられる） -->
     <a-entity id="houki"
-          class="interactable houki-target"
-          gltf-model="houki1.glb"
-          position="10 -3 -3"
-          subtitle-houki
-          scale="1 1 1">
+              class="interactable houki-target"
+              gltf-model="houki1.glb"
+              position="10 -3 -3"
+              subtitle-houki
+              scale="1 1 1">
     </a-entity>
-    
-    <!-- 字幕表示用 -->
+
+    <!-- 字幕表示用（ほうき用） -->
     <a-plane id="houkiSubtitle"
-             position="10 2 -3"
-             rotation="0 90 0"
+             position="0 2 -3"
              width="4"
-             height="2.5"
+             height="2"
              visible="false"
              material="transparent:true; shader:flat">
     </a-plane>
-
 
     <!-- ライト -->
     <a-entity light="type: ambient; intensity: 0.8"></a-entity>
@@ -160,7 +142,6 @@
 
         controller.addEventListener('triggerdown', () => {
           const now = performance.now();
-
           if (now - lastClick < threshold) {
             on = !on;
             glow.setAttribute('visible', on);
@@ -178,21 +159,21 @@
       init: function () {
         const controller = this.el;
         let grabbingEl = null;
-    
+
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
           if (!hits || hits.length === 0) return;
-    
+
           const target = hits[0].object.el;
           if (!target.classList.contains("grab-target")) return;
-    
+
           grabbingEl = target;
-    
-          // コントローラの前の位置を取得
+
+          // コントローラの位置取得
           const ctrlPos = new THREE.Vector3();
           controller.object3D.getWorldPosition(ctrlPos);
-    
-          // 羽を少し浮かせる
+
+          // 羽を浮かせる
           target.setAttribute("animation__lift", {
             property: "position",
             to: `${ctrlPos.x} ${ctrlPos.y + 0.5} ${ctrlPos.z - 0.5}`,
@@ -200,30 +181,27 @@
             easing: "easeOutQuad"
           });
         });
-    
+
         controller.addEventListener('triggerup', () => {
           if (!grabbingEl) return;
-    
-          // 置くときはアニメ消すだけ
+
           grabbingEl.removeAttribute("animation__lift");
           grabbingEl = null;
         });
       }
     });
-</script>
+  </script>
 
-
-  <!-- attract-houki（ほうきを引き寄せる） -->
+  <!-- subtitle-houki（ほうき引き寄せ＋字幕） -->
   <script>
-        AFRAME.registerComponent('subtitle-houki', {
+    AFRAME.registerComponent('subtitle-houki', {
       init: function () {
         const houki = this.el;
         const subtitle = document.querySelector('#houkiSubtitle');
         const controller = document.querySelector('#rightController');
-    
-        let step = 0; // 0:何もしてない, 1:字幕1中, 2:字幕2中, 3:移動準備OK
-    
-        // ★ マウスオーバー（レイが当たる）で字幕①表示
+        let step = 0;
+
+        // ★ レイが当たったら字幕①表示
         houki.addEventListener('raycaster-intersected', () => {
           if (step === 0) {
             subtitle.setAttribute('src', 'houki1.png');
@@ -231,40 +209,36 @@
             step = 1;
           }
         });
-    
-        // ★ トリガー押したときの動き
+
+        // ★ トリガーで進行
         controller.addEventListener('triggerdown', () => {
-          // ほうきにレイが当たっているかチェック
           const hits = controller.components.raycaster.intersections;
           if (!hits.length || hits[0].object.el !== houki) return;
-    
-          // ▼ パターン
+
           if (step === 1) {
             // 字幕① → 字幕②
             subtitle.setAttribute('src', 'houki2.png');
             step = 2;
-    
+
           } else if (step === 2) {
-            // 字幕非表示
+            // 字幕消し → ほうき移動
             subtitle.setAttribute('visible', false);
-    
-            // ほうき移動
+
             const ctrlPos = new THREE.Vector3();
             controller.object3D.getWorldPosition(ctrlPos);
-    
+
             houki.setAttribute("animation__attract", {
               property: "position",
               to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
-              dur: 1000,
+              dur: 2000,
               easing: "easeOutQuad"
             });
-    
+
             step = 3;
           }
         });
       }
     });
-
   </script>
 
   <!-- PNG切り替え（字幕）※ VR対応 -->
@@ -309,17 +283,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
