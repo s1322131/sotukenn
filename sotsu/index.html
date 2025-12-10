@@ -163,50 +163,59 @@
 
   <!-- simple-grab -->
   <script>
-      AFRAME.registerComponent('simple-grab', {
+    AFRAME.registerComponent('simple-grab', {
       init: function () {
         const controller = this.el;
         let grabbingEl = null;
-    
+  
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
           if (!hits || hits.length === 0) return;
-    
+  
           const target = hits[0].object.el;
           if (!target.classList.contains("grab-target")) return;
-    
+  
           grabbingEl = target;
-          // 物理が付いている場合は動かなくする
-          if (grabbingEl.body) grabbingEl.body.mass = 0;
+  
+          // 重力を無効化して浮かせる
+          if (grabbingEl.body) {
+            grabbingEl.body.mass = 0;
+            grabbingEl.body.updateMassProperties();
+          }
         });
-    
+  
         controller.addEventListener('triggerup', () => {
           if (!grabbingEl) return;
-    
-          // 物理を戻す
-          if (grabbingEl.body) grabbingEl.body.mass = 1;
-    
+  
+          // 重力を戻す
+          if (grabbingEl.body) {
+            grabbingEl.body.mass = 1;
+            grabbingEl.body.updateMassProperties();
+          }
+  
           grabbingEl = null;
         });
-    
-        // 毎フレーム呼ばれる
+  
+        // 毎フレーム呼ばれる：レヴィオーサ風ふわっと追従
         this.tick = function () {
           if (!grabbingEl) return;
-    
-          // コントローラの現在位置取得
-          const pos = new THREE.Vector3();
-          controller.object3D.getWorldPosition(pos);
-    
-          // 羽をコントローラ付近に移動
-          grabbingEl.object3D.position.set(
-            pos.x,
-            pos.y,
-            pos.z - 0.5      // 少し前に出したい時はこの値を調整
-          );
+  
+          // コントローラの位置（目標地点）
+          const targetPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(targetPos);
+  
+          targetPos.y += 0.3; // 少し浮かせる（レヴィオーサ感）
+  
+          // 現在位置
+          const currentPos = grabbingEl.object3D.position;
+  
+          // lerpでふわっと追従（0.15は追従速度）
+          currentPos.lerp(targetPos, 0.15);
         };
       }
     });
   </script>
+
 
   <!-- subtitle-houki -->
   <script>
@@ -336,6 +345,7 @@
 
 </body>
 </html>
+
 
 
 
