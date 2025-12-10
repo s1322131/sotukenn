@@ -91,7 +91,7 @@
     <a-entity id="feather"
       class="interactable grab-target"
       gltf-model="hane.glb"
-      position="-2 -1 -3"
+      position="-5 0 -3"
       rotation="0 90 0"
       scale="0.3 0.3 0.3"
       dynamic-body>
@@ -151,40 +151,40 @@
 
   <!-- simple-grab -->
   <script>
-  AFRAME.registerComponent('simple-grab', {
-    init: function () {
-      const controller = this.el;
-      let grabbingEl = null;
+    AFRAME.registerComponent('simple-grab', {
+      init: function () {
+        const controller = this.el;
+        let grabbingEl = null;
   
-      controller.addEventListener('triggerdown', () => {
-        const hits = controller.components.raycaster.intersections;
-        if (!hits || hits.length === 0) return;
+        controller.addEventListener('triggerdown', () => {
+          const hits = controller.components.raycaster.intersections;
+          if (!hits || hits.length === 0) return;
   
-        const target = hits[0].object.el;
-        if (!target.classList.contains("grab-target")) return;
+          const target = hits[0].object.el;
+          if (!target.classList.contains("grab-target")) return;
   
-        grabbingEl = target;
+          grabbingEl = target;
   
-        // body がまだない場合 → body-loaded を待ってから実行
-        if (!target.body) {
-          target.addEventListener('body-loaded', () => {
-            target.body.velocity.set(0, 3, 0);
-            target.body.angularVelocity.set(0, 0, 0);
-          }, { once: true });
-        } else {
-          target.body.velocity.set(0, 3, 0);
-          target.body.angularVelocity.set(0, 0, 0);
-        }
-      });
+          const ctrlPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(ctrlPos);
   
-      controller.addEventListener('triggerup', () => {
-        grabbingEl = null;
-        // あとは physics に任せて自然に落下
-      });
-    }
-  });
+          target.setAttribute("animation__lift", {
+            property: "position",
+            to: `${ctrlPos.x} ${ctrlPos.y + 0.5} ${ctrlPos.z - 0.5}`,
+            dur: 2000,
+            easing: "easeOutQuad"
+          });
+        });
+  
+        controller.addEventListener('triggerup', () => {
+          if (!grabbingEl) return;
+  
+          grabbingEl.removeAttribute("animation__lift");
+          grabbingEl = null;
+        });
+      }
+    });
   </script>
-
 
 
   <!-- subtitle-houki -->
@@ -270,6 +270,7 @@
 
 </body>
 </html>
+
 
 
 
