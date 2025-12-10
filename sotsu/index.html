@@ -163,46 +163,39 @@
 
   <!-- simple-grab -->
   <script>
-    AFRAME.registerComponent('subtitle-hane', {
+    AFRAME.registerComponent('hover-on-trigger', {
       init: function () {
-        const hane = this.el;
-        const subtitle = document.querySelector('#haneSubtitle');
-        const controller = document.querySelector('#rightController');
+        this.controller = document.querySelector('#rightController');
+        this.isFloating = false;
     
-        let step = 0;
+        // 初期位置を保存
+        this.startPos = this.el.object3D.position.clone();
+        this.time = 0;
     
-        hane.addEventListener('raycaster-intersected', () => {
-          if (step === 0) {
-            subtitle.setAttribute('src', 'hane1.png');
-            subtitle.setAttribute('visible', true);
-            step = 1;
-          }
+        this.controller.addEventListener('triggerdown', () => {
+          this.isFloating = true;
         });
     
-        controller.addEventListener('triggerdown', () => {
-          const hits = controller.components.raycaster.intersections;
-          if (!hits.length || hits[0].object.el !== hane) return;
-    
-          if (step === 1) {
-            subtitle.setAttribute('src', 'hane2.png');
-            step = 2;
-    
-          } else if (step === 2) {
-            subtitle.setAttribute('visible', false);
-    
-            const ctrlPos = new THREE.Vector3();
-            controller.object3D.getWorldPosition(ctrlPos);
-    
-            hane.setAttribute("animation__attract", {
-              property: "position",
-              to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
-              dur: 2000,
-              easing: "easeOutQuad"
-            });
-    
-            step = 3;
-          }
+        this.controller.addEventListener('triggerup', () => {
+          this.isFloating = false;
+          // トリガー離したら元の位置に戻す
+          this.el.object3D.position.copy(this.startPos);
         });
+      },
+    
+      tick: function (time, delta) {
+        if (!this.isFloating) return;
+    
+        this.time += delta * 0.001; // 時間を進める
+    
+        const pos = this.startPos.clone();
+        // 上下にフワフワ
+        pos.y += Math.sin(this.time * 2) * 0.2;
+        // 少し左右に揺らす
+        pos.x += Math.sin(this.time * 1.3) * 0.1;
+        pos.z += Math.sin(this.time * 1.7) * 0.1;
+    
+        this.el.object3D.position.copy(pos);
       }
     });
   </script>
@@ -337,6 +330,7 @@
 
 </body>
 </html>
+
 
 
 
