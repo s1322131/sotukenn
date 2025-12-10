@@ -16,16 +16,27 @@
 
     <!-- 字幕（interactable 追加） -->
     <a-plane id="subtitle"
-             src="teacher1.png"
-             position="0 -5 -15"
-             rotation="0 0 90"
-             width="8"
-             height="5"
-             transparent="true"
-             shader="flat"
-             class="interactable"
-             subtitle-switcher>
+        src="teacher1.png"
+        position="0 -5 -15"
+        rotation="0 0 90"
+        width="8"
+        height="5"
+        transparent="true"
+        shader="flat"
+        class="interactable"
+        subtitle-switcher
+        material="opacity: 0.92; side: double">
+    
+        <!-- 控えめな縁取り（魔法っぽい青灰色） -->
+        <a-plane
+          width="8.15"
+          height="5.15"
+          position="0 0 -0.01"
+          material="color: #6c7a96; opacity: 0.18; transparent: true">
+        </a-plane>
+    
     </a-plane>
+
 
     <!-- ★ リセットボタン（interactable 追加） -->
     <a-entity id="reset-btn"
@@ -298,6 +309,7 @@
 
 </body>
 </html>
+
 
 
 
