@@ -125,8 +125,9 @@
       height="2"
       visible="false"
       material="transparent:true; shader:flat"
-      look-at-zfix="#camera">
+      look-at-zfix="target: #camera; zoffset: 90">
     </a-plane>
+
 
     <!-- ライト -->
     <a-entity light="type: ambient; intensity: 0.8"></a-entity>
@@ -231,22 +232,25 @@
 
   <script>
       AFRAME.registerComponent('look-at-zfix', {
-      schema: {type: 'selector'},
-    
-      tick: function () {
-        const target = this.data;
-        if (!target) return;
-    
-        const obj = this.el.object3D;
-        const targetPos = new THREE.Vector3();
-        target.object3D.getWorldPosition(targetPos);
-    
-        obj.lookAt(targetPos);
-    
-        // --- Z軸だけ固定する（ここが重要！）---
-        obj.rotation.z = THREE.Math.degToRad(-90);  // ← 必要なら90を変えられる
-      }
-    });
+        schema: {
+          target: {type: 'selector'},
+          zoffset: {type: 'number', default: -90}
+        },
+      
+        tick: function () {
+          const target = this.data.target;
+          if (!target) return;
+      
+          const obj = this.el.object3D;
+          const targetPos = new THREE.Vector3();
+          target.object3D.getWorldPosition(targetPos);
+      
+          obj.lookAt(targetPos);
+      
+          // z軸にユーザー指定の角度を適用
+          obj.rotation.z = THREE.Math.degToRad(this.data.zoffset);
+        }
+      });
   </script>
 
 
@@ -305,12 +309,18 @@
     
       tick: function () {
         if (!this.isFollowing) return;
-    
+      
         const controller = document.querySelector('#rightController');
-    
+      
+        // コントローラのワールド座標に完全追従
         controller.object3D.getWorldPosition(this.ctrlWorldPos);
-        const newPos = this.ctrlWorldPos.clone().add(this.haneOffset);
-    
+      
+        // 少し前（Z方向）に出したいならここを調整
+        const forward = new THREE.Vector3(0, 0, -0.3);
+        forward.applyQuaternion(controller.object3D.quaternion);
+      
+        const newPos = this.ctrlWorldPos.clone().add(forward);
+      
         this.el.object3D.position.copy(newPos);
       }
     });
@@ -353,6 +363,7 @@
 
 </body>
 </html>
+
 
 
 
