@@ -204,7 +204,7 @@
 
         houki.addEventListener('raycaster-intersected', () => {
           if (step === 0) {
-            subtitle.setAttribute('src', 'houki1.png');
+            subtitle.setAttribute('src', 'houki3.png');
             subtitle.setAttribute('visible', true);
             step = 1;
           }
@@ -215,7 +215,7 @@
           if (!hits.length || hits[0].object.el !== houki) return;
 
           if (step === 1) {
-            subtitle.setAttribute('src', 'houki2.png');
+            subtitle.setAttribute('src', 'houki4.png');
             step = 2;
 
           } else if (step === 2) {
@@ -386,6 +386,7 @@
 
 </body>
 </html>
+
 
 
 
