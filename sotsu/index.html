@@ -248,7 +248,7 @@
         obj.lookAt(targetPos);
     
         // --- Z軸だけ固定する（ここが重要！）---
-        obj.rotation.z = THREE.Math.degToRad(90);  // ← 必要なら90を変えられる
+        obj.rotation.z = THREE.Math.degToRad(-90);  // ← 必要なら90を変えられる
       }
     });
   </script>
@@ -357,6 +357,7 @@
 
 </body>
 </html>
+
 
 
 
