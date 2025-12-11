@@ -100,7 +100,7 @@
 
     <!-- 羽の字幕表示用 -->
     <a-plane id="haneSubtitle"
-      position="-6 0 -4"
+      position="-7 0 -4"
       rotation="0 90 90"
       width="3"
       height="1.5"
@@ -160,48 +160,7 @@
     });
   </script>
 
-
-  <!-- simple-grab -->
-  <script>
-    AFRAME.registerComponent('hover-on-trigger', {
-      init: function () {
-        this.controller = document.querySelector('#rightController');
-        this.isFloating = false;
-    
-        // 初期位置を保存
-        this.startPos = this.el.object3D.position.clone();
-        this.time = 0;
-    
-        this.controller.addEventListener('triggerdown', () => {
-          this.isFloating = true;
-        });
-    
-        this.controller.addEventListener('triggerup', () => {
-          this.isFloating = false;
-          // トリガー離したら元の位置に戻す
-          this.el.object3D.position.copy(this.startPos);
-        });
-      },
-    
-      tick: function (time, delta) {
-        if (!this.isFloating) return;
-    
-        this.time += delta * 0.001; // 時間を進める
-    
-        const pos = this.startPos.clone();
-        // 上下にフワフワ
-        pos.y += Math.sin(this.time * 2) * 0.2;
-        // 少し左右に揺らす
-        pos.x += Math.sin(this.time * 1.3) * 0.1;
-        pos.z += Math.sin(this.time * 1.7) * 0.1;
-    
-        this.el.object3D.position.copy(pos);
-      }
-    });
-  </script>
-
-
-
+  
   <!-- subtitle-houki -->
   <script>
       AFRAME.registerComponent('subtitle-houki', {
@@ -230,6 +189,8 @@
   
             } else if (step === 2) {
               subtitle.setAttribute('visible', false);
+
+              hane.removeAttribute("dynamic-body");
   
               const ctrlPos = new THREE.Vector3();
               controller.object3D.getWorldPosition(ctrlPos);
@@ -354,5 +315,6 @@
 
 </body>
 </html>
+
 
 
