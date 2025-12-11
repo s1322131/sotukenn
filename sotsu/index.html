@@ -256,7 +256,13 @@
         const controller = document.querySelector('#rightController');
     
         let step = 0;
+        let isFollowing = false;
     
+        // コントローラ位置取得用
+        const ctrlWorldPos = new THREE.Vector3();
+        const haneOffset = new THREE.Vector3(); // 羽の相対位置
+    
+        // ① 視線が当たったとき字幕1表示
         hane.addEventListener('raycaster-intersected', () => {
           if (step === 0) {
             subtitle.setAttribute('src', 'hane1.png');
@@ -265,29 +271,47 @@
           }
         });
     
+        // ② トリガー操作
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
           if (!hits.length || hits[0].object.el !== hane) return;
     
+          // ステップ2：字幕2表示
           if (step === 1) {
             subtitle.setAttribute('src', 'hane2.png');
             step = 2;
-    
-          } else if (step === 2) {
-            subtitle.setAttribute('visible', false);
-    
-            const ctrlPos = new THREE.Vector3();
-            controller.object3D.getWorldPosition(ctrlPos);
-    
-            hane.setAttribute("animation__attract", {
-              property: "position",
-              to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
-              dur: 2000,
-              easing: "easeOutQuad"
-            });
-    
-            step = 3;
           }
+    
+          // ステップ3：字幕終了→追従開始
+          else if (step === 2) {
+            subtitle.setAttribute('visible', false);
+            step = 3;
+    
+            // 羽とコントローラの相対位置を記録
+            controller.object3D.getWorldPosition(ctrlWorldPos);
+            hane.object3D.getWorldPosition(haneOffset);
+            haneOffset.sub(ctrlWorldPos);  // offset = 羽 - コントローラ
+    
+            isFollowing = true;
+          }
+        });
+    
+        controller.addEventListener('triggerup', () => {
+          // トリガーを離したら追従停止
+          isFollowing = false;
+        });
+    
+        // ③ 羽を追従させる処理
+        this.el.sceneEl.addEventListener('tick', () => {
+          if (!isFollowing) return;
+    
+          // コントローラの現在位置
+          controller.object3D.getWorldPosition(ctrlWorldPos);
+    
+          // 羽 = コントローラ位置 + 最初の offset
+          const newPos = ctrlWorldPos.clone().add(haneOffset);
+    
+          hane.object3D.position.copy(newPos);
         });
       }
     });
@@ -330,3 +354,4 @@
 
 </body>
 </html>
+
