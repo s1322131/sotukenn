@@ -137,51 +137,47 @@
 
   <!-- 杖ライト制御（ダブルトリガー） -->
   <script>
-  AFRAME.registerComponent('wand-light-control', {
-    init: function () {
-      const controller = document.querySelector('#rightController');
-      const glow = document.querySelector('#wandGlow');
-      const light = document.querySelector('#wandLight');
-  
-      let on = false;
-      let lastClick = 0;
-      const threshold = 300;
-  
-      controller.addEventListener('triggerdown', () => {
-        const now = performance.now();
-        if (now - lastClick < threshold) {
-          on = !on;
-  
-          if (on) {
-            glow.setAttribute('visible', true);
-  
-            // ▼ ふわっと光る
-            light.setAttribute('animation__fadein', {
-              property: 'light.intensity',
-              from: 0,
-              to: 2,
-              dur: 800,
-              easing: 'easeOutQuad'
-            });
-  
-          } else {
-            // ▼ ふわっと消える
-            light.setAttribute('animation__fadeout', {
-              property: 'light.intensity',
-              from: 2,
-              to: 0,
-              dur: 800,
-              easing: 'easeOutQuad'
-            });
-  
-            // 光が0になったあと非表示に
-            setTimeout(() => glow.setAttribute('visible', false), 800);
+      AFRAME.registerComponent('wand-light-control', {
+      init: function () {
+        const controller = document.querySelector('#rightController');
+        const glow = document.querySelector('#wandGlow');
+        const light = document.querySelector('#wandLight');
+    
+        let on = false;
+        let lastClick = 0;
+        const threshold = 300;
+    
+        this.targetIntensity = 0;   // ← 目標の明るさ
+        this.currentIntensity = 0;  // ← 現在の明るさ（アニメ用）
+    
+        controller.addEventListener('triggerdown', () => {
+          const now = performance.now();
+          if (now - lastClick < threshold) {
+            on = !on;
+    
+            if (on) {
+              glow.setAttribute('visible', true);
+              this.targetIntensity = 2;   // ← ゆっくり2まで上昇
+            } else {
+              this.targetIntensity = 0;   // ← ゆっくり0まで下降
+              setTimeout(() => glow.setAttribute('visible', false), 500);
+            }
           }
-        }
-        lastClick = now;
-      });
-    }
-  });
+          lastClick = now;
+        });
+      },
+    
+      tick: function (time, delta) {
+        const light = document.querySelector('#wandLight');
+        const speed = 0.005;  // ← 上昇/下降のスピード（好みで調整）
+    
+        // 緩やかに目的値へ近づける（イージング風）
+        this.currentIntensity += (this.targetIntensity - this.currentIntensity) * (delta * speed);
+    
+        // 反映
+        light.setAttribute('light', 'intensity', this.currentIntensity);
+      }
+    });
   </script>
 
 
@@ -357,6 +353,7 @@
 
 </body>
 </html>
+
 
 
 
