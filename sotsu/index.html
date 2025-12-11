@@ -132,23 +132,32 @@
         const controller = document.querySelector('#rightController');
         this.glow = document.querySelector('#wandGlow');
         this.light = document.querySelector('#wandLight');
+        this.amb = document.querySelector('#ambLight'); // ★ ambient light 取得
     
         this.isOn = false;
         this.lastClick = 0;
         this.threshold = 300;
     
-        // ライト
+        // ライト明るさ
         this.currentIntensity = 0;
         this.targetIntensity = 0;
     
-        // emissive（光球そのものの発光）
+        // ライトの照射距離
+        this.currentDistance = 1;
+        this.targetDistance = 1;
+    
+        // 光球の発光
         this.currentEmissive = 0;
         this.targetEmissive = 0;
     
-        // 光球スケール
+        // 光球サイズ
         this.currentScale = 0.01;
         this.targetScale = 0.01;
         this.glow.setAttribute("scale", "0.01 0.01 0.01");
+    
+        // Ambient light
+        this.currentAmbient = 0.5;
+        this.targetAmbient = 0.5;
     
         controller.addEventListener('triggerdown', () => {
           const now = performance.now();
@@ -156,18 +165,22 @@
             this.isOn = !this.isOn;
     
             if (this.isOn) {
-              // 光 ON
               this.glow.setAttribute('visible', true);
     
-              this.targetIntensity = 2.5;  // ライトの明るさ
-              this.targetEmissive = 2.0;   // 光球の強さ（重要！）
-              this.targetScale = 1.6;      // 光球サイズ
+              this.targetIntensity = 3.0;
+              this.targetDistance = 6.0;   // ★ 周囲も照らす
+              this.targetEmissive = 2.0;
+              this.targetScale = 1.8;
+    
+              this.targetAmbient = 1.2;    // ★ 部屋全体がふわっと明るく
     
             } else {
-              // 光 OFF
               this.targetIntensity = 0;
+              this.targetDistance = 1;
               this.targetEmissive = 0;
               this.targetScale = 0.01;
+    
+              this.targetAmbient = 0.5;   // ★ 元の明るさへ戻す
     
               setTimeout(() => this.glow.setAttribute('visible', false), 800);
             }
@@ -177,14 +190,17 @@
       },
     
       tick: function (time, delta) {
-        // ★ めちゃ遅くする（0.001）
         const speed = delta * 0.001;
     
-        /* 光の明るさ（ライト）*/
+        /* ライト明るさ */
         this.currentIntensity += (this.targetIntensity - this.currentIntensity) * speed;
         this.light.setAttribute("light", "intensity", this.currentIntensity);
     
-        /* 光球の発光（色の強さ）*/
+        /* ライト照射距離 */
+        this.currentDistance += (this.targetDistance - this.currentDistance) * speed;
+        this.light.setAttribute("light", "distance", this.currentDistance);
+    
+        /* 光球の明るさ */
         this.currentEmissive += (this.targetEmissive - this.currentEmissive) * speed;
         this.glow.setAttribute("emissiveIntensity", this.currentEmissive);
     
@@ -195,12 +211,13 @@
           y: this.currentScale,
           z: this.currentScale
         });
+    
+        /* 環境光（Ambient Light）*/
+        this.currentAmbient += (this.targetAmbient - this.currentAmbient) * speed;
+        this.amb.setAttribute("light", "intensity", this.currentAmbient);
       }
     });
     </script>
-
-
-
 
   <!-- ほうき字幕 -->
   <script>
@@ -396,6 +413,7 @@
 
 </body>
 </html>
+
 
 
 
