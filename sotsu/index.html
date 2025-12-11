@@ -121,12 +121,11 @@
     <!-- 字幕表示用 -->
     <a-plane id="houkiSubtitle"
       position="10 2 -2"
-      rotation="0 0 90"
-      look-at="[camera]"
       width="4"
       height="2"
       visible="false"
-      material="transparent:true; shader:flat">
+      material="transparent:true; shader:flat"
+      look-at-zfix="#camera">
     </a-plane>
 
     <!-- ライト -->
@@ -233,6 +232,27 @@
         }
       });
     </script>
+
+  <script>
+      AFRAME.registerComponent('look-at-zfix', {
+      schema: {type: 'selector'},
+    
+      tick: function () {
+        const target = this.data;
+        if (!target) return;
+    
+        const obj = this.el.object3D;
+        const targetPos = new THREE.Vector3();
+        target.object3D.getWorldPosition(targetPos);
+    
+        obj.lookAt(targetPos);
+    
+        // --- Z軸だけ固定する（ここが重要！）---
+        obj.rotation.z = THREE.Math.degToRad(90);  // ← 必要なら90を変えられる
+      }
+    });
+  </script>
+
 
   <script>
     AFRAME.registerComponent('subtitle-hane', {
@@ -342,6 +362,7 @@
 
 </body>
 </html>
+
 
 
 
