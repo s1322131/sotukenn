@@ -112,10 +112,10 @@
     <!-- ほうき字幕 -->
     <a-plane id="houkiSubtitle"
              position="10 2 -2"
+             rotation="0 0 0"
              width="4" height="2"
              visible="false"
-             material="transparent:true; shader:flat"
-             look-at-zfix="target: #camera; zoffset: 0">
+             material="transparent:true; shader:flat">
     </a-plane>
 
     <!-- ライト -->
@@ -267,31 +267,6 @@
   </script>
 
 
-  <!-- look-at-zfix -->
-  <script>
-    AFRAME.registerComponent('look-at-zfix', {
-      schema: {
-        target: { type: 'selector' },
-        zoffset: { type: 'number', default: -90 }
-      },
-
-      tick: function () {
-        const target = this.data.target;
-        if (!target) return;
-
-        const obj = this.el.object3D;
-
-        const targetPos = new THREE.Vector3();
-        target.object3D.getWorldPosition(targetPos);
-
-        obj.lookAt(targetPos);
-
-        obj.rotation.z = THREE.Math.degToRad(this.data.zoffset);
-      }
-    });
-  </script>
-
-
   <!-- 羽字幕 -->
   <script>
     AFRAME.registerComponent('subtitle-hane', {
@@ -414,6 +389,7 @@
 
 </body>
 </html>
+
 
 
 
