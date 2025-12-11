@@ -294,16 +294,22 @@
 
       tick: function () {
         if (!this.isFollowing) return;
-
+      
         const controller = document.querySelector('#rightController');
-
+      
+        // コントローラーのワールド位置を取得
         controller.object3D.getWorldPosition(this.ctrlWorldPos);
-
-        const forward = new THREE.Vector3(0, 0, -0.3);
-        forward.applyQuaternion(controller.object3D.quaternion);
-
-        const newPos = this.ctrlWorldPos.clone().add(forward);
-
+      
+        // ★ 羽の現在の位置
+        const currentPos = this.el.object3D.position;
+      
+        // ★ 新しい位置：Yだけ追従
+        const newPos = new THREE.Vector3(
+          currentPos.x,                  // Xは固定
+          this.ctrlWorldPos.y,           // Yだけ追従
+          currentPos.z                   // Zも固定
+        );
+      
         this.el.object3D.position.copy(newPos);
       }
     });
@@ -346,3 +352,4 @@
 
 </body>
 </html>
+
