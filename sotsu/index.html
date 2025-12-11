@@ -130,46 +130,66 @@
     AFRAME.registerComponent('wand-light-control', {
       init: function () {
         const controller = document.querySelector('#rightController');
-        const glow = document.querySelector('#wandGlow');
-        const light = document.querySelector('#wandLight');
-
-        let on = false;
-        let lastClick = 0;
-        const threshold = 300;
-
-        this.targetIntensity = 0;
+        this.glow = document.querySelector('#wandGlow');
+        this.light = document.querySelector('#wandLight');
+    
+        this.isOn = false;
+        this.lastClick = 0;
+        this.threshold = 300;
+    
+        // アニメ用
         this.currentIntensity = 0;
-
+        this.targetIntensity = 0;
+    
+        this.currentScale = 0.01;    // ← 最初はほぼ見えない
+        this.targetScale = 0.01;     // ← OFF時
+        this.glow.setAttribute("scale", "0.01 0.01 0.01");
+    
         controller.addEventListener('triggerdown', () => {
           const now = performance.now();
-
-          if (now - lastClick < threshold) {
-            on = !on;
-
-            if (on) {
-              glow.setAttribute('visible', true);
-              this.targetIntensity = 2;
+    
+          if (now - this.lastClick < this.threshold) {
+            this.isOn = !this.isOn;
+    
+            if (this.isOn) {
+              // 光 ON
+              this.glow.setAttribute('visible', true);
+    
+              this.targetIntensity = 2.5;  // 光の強さ
+              this.targetScale = 1.6;      // 光球の最大サイズ
+    
             } else {
+              // 光 OFF
               this.targetIntensity = 0;
-              setTimeout(() => glow.setAttribute('visible', false), 500);
+              this.targetScale = 0.01; // 小さくして消える
+    
+              // 完全に縮んだら見えなくする
+              setTimeout(() => this.glow.setAttribute('visible', false), 500);
             }
           }
-
-          lastClick = now;
+    
+          this.lastClick = now;
         });
       },
-
+    
       tick: function (time, delta) {
-        const light = document.querySelector('#wandLight');
-        const speed = 0.005;
-
-        this.currentIntensity +=
-          (this.targetIntensity - this.currentIntensity) * (delta * speed);
-
-        light.setAttribute('light', 'intensity', this.currentIntensity);
+        const speed = delta * 0.005;
+    
+        /* ✔ intensity（明るさ）アニメーション */
+        this.currentIntensity += (this.targetIntensity - this.currentIntensity) * speed;
+        this.light.setAttribute("light", "intensity", this.currentIntensity);
+    
+        /* ✔ scale（光球の大きさ）アニメーション */
+        this.currentScale += (this.targetScale - this.currentScale) * speed;
+        this.glow.setAttribute("scale", {
+          x: this.currentScale,
+          y: this.currentScale,
+          z: this.currentScale
+        });
       }
     });
-  </script>
+    </script>
+
 
 
   <!-- ほうき字幕 -->
@@ -366,6 +386,7 @@
 
 </body>
 </html>
+
 
 
 
