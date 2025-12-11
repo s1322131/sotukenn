@@ -57,8 +57,10 @@
     <a-entity id="rightController"
       laser-controls="hand: right"
       raycaster="objects: .interactable; lineColor: red; far: 20"
-      class="interactable">
-      
+      class="interactable"
+      simple-grab
+      attract-houki>
+
       <!-- 杖 -->
       <a-entity id="wand"
         gltf-model="tsue2.glb"
@@ -87,14 +89,25 @@
 
     <!-- 羽 -->
     <a-entity id="feather"
-      class="interactable"
+      class="interactable grab-target"
       gltf-model="hane.glb"
       position="-5 -1 -3"
       rotation="90 90 0"
       scale="0.3 0.3 0.3"
-      subtitle-hane
-      float-follow>
+      dynamic-body
+      subtitle-hane>
     </a-entity>
+
+    <!-- 羽の字幕表示用 -->
+    <a-plane id="haneSubtitle"
+      position="-6 0 -4"
+      rotation="0 90 90"
+      width="3"
+      height="1.5"
+      visible="false"
+      material="transparent:true; shader:flat">
+    </a-plane>
+
 
     <!-- ほうき -->
     <a-entity id="houki"
@@ -105,10 +118,10 @@
       scale="1 1 1">
     </a-entity>
 
-    <!-- 字幕 -->
+    <!-- 字幕表示用 -->
     <a-plane id="houkiSubtitle"
       position="10 2 -2"
-      rotation="90 45 0"
+      rotation="120 190 0"
       width="4"
       height="2"
       visible="false"
@@ -148,18 +161,102 @@
   </script>
 
 
+  <!-- simple-grab -->
+  <script>
+    AFRAME.registerComponent('hover-on-trigger', {
+      init: function () {
+        this.controller = document.querySelector('#rightController');
+        this.isFloating = false;
+    
+        // 初期位置を保存
+        this.startPos = this.el.object3D.position.clone();
+        this.time = 0;
+    
+        this.controller.addEventListener('triggerdown', () => {
+          this.isFloating = true;
+        });
+    
+        this.controller.addEventListener('triggerup', () => {
+          this.isFloating = false;
+          // トリガー離したら元の位置に戻す
+          this.el.object3D.position.copy(this.startPos);
+        });
+      },
+    
+      tick: function (time, delta) {
+        if (!this.isFloating) return;
+    
+        this.time += delta * 0.001; // 時間を進める
+    
+        const pos = this.startPos.clone();
+        // 上下にフワフワ
+        pos.y += Math.sin(this.time * 2) * 0.2;
+        // 少し左右に揺らす
+        pos.x += Math.sin(this.time * 1.3) * 0.1;
+        pos.z += Math.sin(this.time * 1.7) * 0.1;
+    
+        this.el.object3D.position.copy(pos);
+      }
+    });
+  </script>
 
-  <!-- ★ 羽の字幕：ほうきと同じ進行 → 字幕①（当てるだけ）→ 字幕②（トリガー）→ 浮遊解禁 -->
+
+
+  <!-- subtitle-houki -->
+  <script>
+      AFRAME.registerComponent('subtitle-houki', {
+        init: function () {
+          const houki = this.el;
+          const subtitle = document.querySelector('#houkiSubtitle');
+          const controller = document.querySelector('#rightController');
+  
+          let step = 0;
+  
+          houki.addEventListener('raycaster-intersected', () => {
+            if (step === 0) {
+              subtitle.setAttribute('src', 'houki1.png');
+              subtitle.setAttribute('visible', true);
+              step = 1;
+            }
+          });
+  
+          controller.addEventListener('triggerdown', () => {
+            const hits = controller.components.raycaster.intersections;
+            if (!hits.length || hits[0].object.el !== houki) return;
+  
+            if (step === 1) {
+              subtitle.setAttribute('src', 'houki2.png');
+              step = 2;
+  
+            } else if (step === 2) {
+              subtitle.setAttribute('visible', false);
+  
+              const ctrlPos = new THREE.Vector3();
+              controller.object3D.getWorldPosition(ctrlPos);
+  
+              houki.setAttribute("animation__attract", {
+                property: "position",
+                to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+                dur: 2000,
+                easing: "easeOutQuad"
+              });
+  
+              step = 3;
+            }
+          });
+        }
+      });
+    </script>
+
   <script>
     AFRAME.registerComponent('subtitle-hane', {
       init: function () {
         const hane = this.el;
-        const subtitle = document.querySelector('#subtitle');
+        const subtitle = document.querySelector('#haneSubtitle');
         const controller = document.querySelector('#rightController');
-
+    
         let step = 0;
-
-        // ★レーザーを当てたら字幕①
+    
         hane.addEventListener('raycaster-intersected', () => {
           if (step === 0) {
             subtitle.setAttribute('src', 'hane1.png');
@@ -167,78 +264,34 @@
             step = 1;
           }
         });
-
-        // ★トリガーで字幕② → そのあとで浮遊解禁
+    
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
           if (!hits.length || hits[0].object.el !== hane) return;
-
+    
           if (step === 1) {
             subtitle.setAttribute('src', 'hane2.png');
             step = 2;
-            return;
-          }
-
-          if (step === 2) {
+    
+          } else if (step === 2) {
             subtitle.setAttribute('visible', false);
-
-            // ★float-follow 起動フラグ
-            hane.setAttribute('float-ready', 'true');
-
+    
+            const ctrlPos = new THREE.Vector3();
+            controller.object3D.getWorldPosition(ctrlPos);
+    
+            hane.setAttribute("animation__attract", {
+              property: "position",
+              to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+              dur: 2000,
+              easing: "easeOutQuad"
+            });
+    
             step = 3;
           }
         });
       }
     });
   </script>
-
-
-
-  <!-- ★ 羽がトリガー中だけ上下ふわふわしつつ追従 -->
-  <script>
-    AFRAME.registerComponent('float-follow', {
-      schema: {},
-
-      init: function () {
-        this.controller = document.querySelector('#rightController');
-        this.following = false;
-        this.time = 0;
-
-        // トリガー押したら追従ON
-        this.controller.addEventListener('triggerdown', () => {
-          if (this.el.getAttribute('float-ready')) {
-            this.following = true;
-          }
-        });
-
-        // 離したら止まる
-        this.controller.addEventListener('triggerup', () => {
-          this.following = false;
-        });
-      },
-
-      tick: function (t, dt) {
-        if (!this.following) return;
-
-        this.time += dt * 0.001;
-
-        // コントローラ位置
-        const ctrlPos = new THREE.Vector3();
-        this.controller.object3D.getWorldPosition(ctrlPos);
-
-        // 自然な浮遊
-        let yOffset = Math.sin(this.time * 2) * 0.15;
-        let xOffset = Math.sin(this.time * 1.3) * 0.05;
-
-        this.el.object3D.position.set(
-          ctrlPos.x + xOffset,
-          ctrlPos.y + yOffset,
-          ctrlPos.z - 0.4
-        );
-      }
-    });
-  </script>
-
 
 
   <!-- PNG切り替え -->
