@@ -137,17 +137,21 @@
         this.lastClick = 0;
         this.threshold = 300;
     
-        // アニメ用
+        // ライト
         this.currentIntensity = 0;
         this.targetIntensity = 0;
     
-        this.currentScale = 0.01;    // ← 最初はほぼ見えない
-        this.targetScale = 0.01;     // ← OFF時
+        // emissive（光球そのものの発光）
+        this.currentEmissive = 0;
+        this.targetEmissive = 0;
+    
+        // 光球スケール
+        this.currentScale = 0.01;
+        this.targetScale = 0.01;
         this.glow.setAttribute("scale", "0.01 0.01 0.01");
     
         controller.addEventListener('triggerdown', () => {
           const now = performance.now();
-    
           if (now - this.lastClick < this.threshold) {
             this.isOn = !this.isOn;
     
@@ -155,31 +159,36 @@
               // 光 ON
               this.glow.setAttribute('visible', true);
     
-              this.targetIntensity = 2.5;  // 光の強さ
-              this.targetScale = 1.6;      // 光球の最大サイズ
+              this.targetIntensity = 2.5;  // ライトの明るさ
+              this.targetEmissive = 2.0;   // 光球の強さ（重要！）
+              this.targetScale = 1.6;      // 光球サイズ
     
             } else {
               // 光 OFF
               this.targetIntensity = 0;
-              this.targetScale = 0.01; // 小さくして消える
+              this.targetEmissive = 0;
+              this.targetScale = 0.01;
     
-              // 完全に縮んだら見えなくする
-              setTimeout(() => this.glow.setAttribute('visible', false), 500);
+              setTimeout(() => this.glow.setAttribute('visible', false), 800);
             }
           }
-    
           this.lastClick = now;
         });
       },
     
       tick: function (time, delta) {
-        const speed = delta * 0.005;
+        // ★ めちゃ遅くする（0.001）
+        const speed = delta * 0.001;
     
-        /* ✔ intensity（明るさ）アニメーション */
+        /* 光の明るさ（ライト）*/
         this.currentIntensity += (this.targetIntensity - this.currentIntensity) * speed;
         this.light.setAttribute("light", "intensity", this.currentIntensity);
     
-        /* ✔ scale（光球の大きさ）アニメーション */
+        /* 光球の発光（色の強さ）*/
+        this.currentEmissive += (this.targetEmissive - this.currentEmissive) * speed;
+        this.glow.setAttribute("emissiveIntensity", this.currentEmissive);
+    
+        /* 光球の大きさ */
         this.currentScale += (this.targetScale - this.currentScale) * speed;
         this.glow.setAttribute("scale", {
           x: this.currentScale,
@@ -189,6 +198,7 @@
       }
     });
     </script>
+
 
 
 
@@ -386,6 +396,7 @@
 
 </body>
 </html>
+
 
 
 
