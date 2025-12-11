@@ -251,12 +251,13 @@
         const hane = this.el;
         const subtitle = document.querySelector('#haneSubtitle');
         const controller = document.querySelector('#rightController');
-
+    
         this.step = 0;
-        this.isFollowing = false;
-        this.ctrlWorldPos = new THREE.Vector3();
-        this.haneOffset = new THREE.Vector3();
-
+        this.isRising = false;
+        this.riseStartY = 0;
+        this.riseTargetY = 0;
+    
+        /* 視線を当てたら字幕1 */
         hane.addEventListener('raycaster-intersected', () => {
           if (this.step === 0) {
             subtitle.setAttribute('src', 'hane1.png');
@@ -264,56 +265,69 @@
             this.step = 1;
           }
         });
-
+    
+        /* トリガー操作 */
         controller.addEventListener('triggerdown', () => {
           const hits = controller.components.raycaster.intersections;
           if (!hits.length || hits[0].object.el !== hane) return;
-
+    
+          // 2段階目 → 掴む前の説明
           if (this.step === 1) {
             subtitle.setAttribute('src', 'hane2.png');
             this.step = 2;
-
-          } else if (this.step === 2) {
+            return;
+          }
+    
+          // 3段階目 → 上昇開始
+          if (this.step === 2) {
             subtitle.setAttribute('visible', false);
-            this.step = 3;
-
+    
+            // 物理削除
             hane.removeAttribute("dynamic-body");
-
-            controller.object3D.getWorldPosition(this.ctrlWorldPos);
-            hane.object3D.getWorldPosition(this.haneOffset);
-            this.haneOffset.sub(this.ctrlWorldPos);
-
-            this.isFollowing = true;
+    
+            // 上昇開始
+            this.startRise();
+    
+            // 次からも何回でも上昇できるように保持
+            this.step = 2;
           }
         });
-
-        controller.addEventListener('triggerup', () => {
-          this.isFollowing = false;
-        });
       },
-
-      tick: function () {
-        if (!this.isFollowing) return;
-      
-        const controller = document.querySelector('#rightController');
-      
-        // コントローラーのワールド位置を取得
-        controller.object3D.getWorldPosition(this.ctrlWorldPos);
-      
-        // ★ 羽の現在の位置
-        const currentPos = this.el.object3D.position;
-      
-        // ★ 新しい位置：Yだけ追従
-        const newPos = new THREE.Vector3(
-          currentPos.x,                  // Xは固定
-          this.ctrlWorldPos.y,           // Yだけ追従
-          currentPos.z                   // Zも固定
-        );
-      
-        this.el.object3D.position.copy(newPos);
+    
+      /* 上昇準備 */
+      startRise: function () {
+        this.isRising = true;
+    
+        const pos = this.el.object3D.position;
+    
+        // 今の高さから少し上まで上昇
+        this.riseStartY = pos.y;
+        this.riseTargetY = pos.y + 2.0; // ← 上昇量（好みで変えられる）
+        this.riseTime = 0;
+      },
+    
+      tick: function (time, delta) {
+        if (!this.isRising) return;
+    
+        const hane = this.el.object3D;
+    
+        // 0 → 1 へ進む割合
+        this.riseTime += delta / 2000; // ← 上昇スピード（ゆっくり）
+    
+        if (this.riseTime >= 1) {
+          this.riseTime = 1;
+          this.isRising = false; // 到達したら停止
+        }
+    
+        // 補間（スムーズに上昇）
+        const newY =
+          THREE.MathUtils.lerp(this.riseStartY, this.riseTargetY, this.riseTime);
+    
+        hane.position.y = newY;
       }
     });
-  </script>
+    </script>
+
 
 
   <!-- PNG切り替え -->
@@ -352,5 +366,6 @@
 
 </body>
 </html>
+
 
 
