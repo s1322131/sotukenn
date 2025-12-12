@@ -181,38 +181,35 @@ AFRAME.registerComponent('wand-light-control', {
 <script>
 AFRAME.registerComponent('subtitle-hikari', {
     init: function () {
-        const zone = document.querySelector('#hikariZone');
+        const zone = this.el;
         const subtitle = document.querySelector('#hikariSubtitle');
+        const controller = document.querySelector('#rightController');
         const images = ['hikari1.png', 'hikari2.png'];
-        this.step = 0; // 0:未表示,1:①,2:②
+        let index = 0;
+        let entered = false;
 
+        // 視線を当てたら1枚目を表示
         zone.addEventListener('raycaster-intersected', () => {
-            if (this.step === 0) {
+            if (!entered) {
                 subtitle.setAttribute('src', images[0]);
                 subtitle.setAttribute('visible', true);
-                this.step = 1;
+                entered = true;
             }
         });
 
-        const toggleImage = () => {
-            if (this.step === 1) {
-                subtitle.setAttribute('src', images[1]);
-                this.step = 2;
-            } else if (this.step === 2) {
-                subtitle.setAttribute('src', images[0]);
-                this.step = 1;
-            }
-            // 光音再生
-            const sound = document.querySelector('#soundRevi');
-            sound.currentTime = 0;
-            sound.play();
-        };
-
-        subtitle.addEventListener('click', toggleImage);
-        subtitle.addEventListener('triggerdown', toggleImage);
+        // トリガーで 1 ↔ 2 無限ループ
+        controller.addEventListener('triggerdown', () => {
+            const hits = controller.components.raycaster.intersections;
+            const touched = hits.some(h => h.object.el === zone);
+            if (!touched) return;
+            index = (index + 1) % images.length;
+            subtitle.setAttribute('src', images[index]);
+        });
     }
 });
 </script>
+
+
 
 <!-- 羽字幕 -->
 <script>
@@ -358,3 +355,4 @@ AFRAME.registerComponent('reset-scene', {
 
 </body>
 </html>
+
