@@ -181,34 +181,36 @@
     <!-- 光字幕 -->
     <script>
     AFRAME.registerComponent('subtitle-hikari', {
-      init: function () {
-        const zone = this.el;
-        const subtitle = document.querySelector('#hikariSubtitle');
-        const controller = document.querySelector('#rightController');
+        init: function () {
+            const zone = document.querySelector('#hikariZone'); // 透明ボックス
+            const subtitle = document.querySelector('#hikariSubtitle');
+            const controller = document.querySelector('#rightController');
+            const images = ['hikari1.png', 'hikari2.png'];
+            let step = 0; // 0: 未表示, 1: ①表示, 2: ②表示
     
-        const images = ['hikari1.png', 'hikari2.png'];
-        let index = 0;
-        let entered = false;
+            // 透明ボックスに触れたら①を表示
+            zone.addEventListener('raycaster-intersected', () => {
+                if (step === 0) {
+                    subtitle.setAttribute('src', images[0]);
+                    subtitle.setAttribute('visible', true);
+                    step = 1;
+                }
+            });
     
-        // 視線を当てたら1枚目を表示
-        zone.addEventListener('raycaster-intersected', () => {
-          if (!entered) {
-            subtitle.setAttribute('src', images[0]);
-            subtitle.setAttribute('visible', true);
-            entered = true;
-          }
-        });
+            // 字幕を押すと交互に切り替え
+            const toggleImage = () => {
+                if (step === 1) {
+                    subtitle.setAttribute('src', images[1]);
+                    step = 2;
+                } else if (step === 2) {
+                    subtitle.setAttribute('src', images[0]);
+                    step = 1;
+                }
+            };
     
-        // トリガーで 1 ↔ 2 無限ループ
-        controller.addEventListener('triggerdown', () => {
-          const hits = controller.components.raycaster.intersections;
-          const touched = hits.some(h => h.object.el === zone);
-          if (!touched) return;
-    
-          index = (index + 1) % images.length;
-          subtitle.setAttribute('src', images[index]);
-        });
-      }
+            subtitle.addEventListener('click', toggleImage);
+            subtitle.addEventListener('triggerdown', toggleImage);
+        }
     });
     </script>
 
@@ -355,6 +357,7 @@
     </script>
 </body>
 </html>
+
 
 
 
