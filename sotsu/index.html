@@ -2,11 +2,10 @@
 <html lang="ja">
 <head>
     <meta charset="utf-8">
-    <title>VR 魔法杖＋先生モデル＋羽つかみ＋音声</title>
+    <title>VR 魔法杖＋先生モデル＋羽つかみ＋効果音</title>
 
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-
     <!-- Physics -->
     <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
 </head>
@@ -14,16 +13,10 @@
 <body>
 <a-scene vr-mode-ui="enabled: true" wand-light-control physics="debug: true">
 
-    <!-- 音声 -->
-    <audio id="soundRevi" src="revi.mp3"></audio>
-    <audio id="soundAcsio" src="acsio.mp3"></audio>
-    <audio id="soundRumos" src="rumos.mp3"></audio>
-
     <!-- 字幕 -->
     <a-plane id="subtitle" src="teacher1.png" position="0 -5 -15" rotation="0 0 90"
              width="8" height="5" transparent="true" shader="flat" class="interactable"
-             subtitle-switcher>
-    </a-plane>
+             subtitle-switcher></a-plane>
 
     <!-- リセットボタン -->
     <a-plane id="resetBtn" position="0 5 -12" width="2" height="1" color="#696969"
@@ -99,9 +92,14 @@
     <a-entity id="ambLight" light="type: ambient; intensity: 0.8"></a-entity>
     <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
 
+    <!-- 音声 -->
+    <audio id="soundRumos" src="rumos.mp3"></audio> <!-- 羽用 -->
+    <audio id="soundRevi" src="revi.mp3"></audio>   <!-- 光用 -->
+    <audio id="soundAcsio" src="acsio.mp3"></audio> <!-- ほうき用 -->
+
 </a-scene>
 
-<!-- 杖ライト制御 -->
+<!-- 杖ライト制御（ダブルトリガー） -->
 <script>
 AFRAME.registerComponent('wand-light-control', {
     init: function () {
@@ -109,7 +107,6 @@ AFRAME.registerComponent('wand-light-control', {
         this.glow = document.querySelector('#wandGlow');
         this.light = document.querySelector('#wandLight');
         this.amb = document.querySelector('#ambLight');
-        this.sound = document.querySelector('#soundRumos'); // 光音
 
         this.isOn = false;
         this.lastClick = 0;
@@ -142,9 +139,10 @@ AFRAME.registerComponent('wand-light-control', {
                     this.targetEmissive = 2.0;
                     this.targetScale = 1.2;
                     this.targetAmbient = 2.0;
-
-                    this.sound.currentTime = 0;
-                    this.sound.play();
+                    // 光音再生
+                    const sound = document.querySelector('#soundRevi');
+                    sound.currentTime = 0;
+                    sound.play();
                 } else {
                     this.targetIntensity = 0;
                     this.targetDistance = 1;
@@ -186,7 +184,7 @@ AFRAME.registerComponent('subtitle-hikari', {
         const zone = document.querySelector('#hikariZone');
         const subtitle = document.querySelector('#hikariSubtitle');
         const images = ['hikari1.png', 'hikari2.png'];
-        this.step = 0;
+        this.step = 0; // 0:未表示,1:①,2:②
 
         zone.addEventListener('raycaster-intersected', () => {
             if (this.step === 0) {
@@ -204,61 +202,14 @@ AFRAME.registerComponent('subtitle-hikari', {
                 subtitle.setAttribute('src', images[0]);
                 this.step = 1;
             }
+            // 光音再生
+            const sound = document.querySelector('#soundRevi');
+            sound.currentTime = 0;
+            sound.play();
         };
 
-        subtitle.addEventListener('click', () => {
-            toggleImage();
-            document.querySelector('#soundRumos').play();
-        });
-        subtitle.addEventListener('triggerdown', () => {
-            toggleImage();
-            document.querySelector('#soundRumos').play();
-        });
-    }
-});
-</script>
-
-<!-- ほうき字幕 -->
-<script>
-AFRAME.registerComponent('subtitle-houki', {
-    init: function () {
-        const houki = this.el;
-        const subtitle = document.querySelector('#houkiSubtitle');
-        const controller = document.querySelector('#rightController');
-        const sound = document.querySelector('#soundAcsio');
-        let step = 0;
-
-        houki.addEventListener('raycaster-intersected', () => {
-            if (step === 0) {
-                subtitle.setAttribute('src', 'houki3.png');
-                subtitle.setAttribute('visible', true);
-                step = 1;
-            }
-        });
-
-        controller.addEventListener('triggerdown', () => {
-            const hits = controller.components.raycaster.intersections;
-            if (!hits.length || hits[0].object.el !== houki) return;
-
-            if (step === 1) {
-                subtitle.setAttribute('src', 'houki4.png');
-                step = 2;
-            } else if (step === 2) {
-                subtitle.setAttribute('visible', false);
-                const ctrlPos = new THREE.Vector3();
-                controller.object3D.getWorldPosition(ctrlPos);
-                houki.setAttribute("animation__attract", {
-                    property: "position",
-                    to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
-                    dur: 2000,
-                    easing: "easeOutQuad"
-                });
-                step = 3;
-
-                sound.currentTime = 0;
-                sound.play();
-            }
-        });
+        subtitle.addEventListener('click', toggleImage);
+        subtitle.addEventListener('triggerdown', toggleImage);
     }
 });
 </script>
@@ -270,7 +221,6 @@ AFRAME.registerComponent('subtitle-hane', {
         const hane = this.el;
         const subtitle = document.querySelector('#haneSubtitle');
         const controller = document.querySelector('#rightController');
-        const sound = document.querySelector('#soundRevi');
 
         this.step = 0;
         this.isRising = false;
@@ -300,7 +250,8 @@ AFRAME.registerComponent('subtitle-hane', {
                 hane.removeAttribute("dynamic-body");
                 this.startRise();
                 this.step = 2;
-
+                // 羽音再生
+                const sound = document.querySelector('#soundRumos');
                 sound.currentTime = 0;
                 sound.play();
             }
@@ -324,6 +275,51 @@ AFRAME.registerComponent('subtitle-hane', {
             this.isRising = false;
         }
         hane.position.y = THREE.MathUtils.lerp(this.riseStartY, this.riseTargetY, this.riseTime);
+    }
+});
+</script>
+
+<!-- ほうき字幕 -->
+<script>
+AFRAME.registerComponent('subtitle-houki', {
+    init: function () {
+        const houki = this.el;
+        const subtitle = document.querySelector('#houkiSubtitle');
+        const controller = document.querySelector('#rightController');
+        let step = 0;
+
+        houki.addEventListener('raycaster-intersected', () => {
+            if (step === 0) {
+                subtitle.setAttribute('src', 'houki3.png');
+                subtitle.setAttribute('visible', true);
+                step = 1;
+            }
+        });
+
+        controller.addEventListener('triggerdown', () => {
+            const hits = controller.components.raycaster.intersections;
+            if (!hits.length || hits[0].object.el !== houki) return;
+
+            if (step === 1) {
+                subtitle.setAttribute('src', 'houki4.png');
+                step = 2;
+            } else if (step === 2) {
+                subtitle.setAttribute('visible', false);
+                const ctrlPos = new THREE.Vector3();
+                controller.object3D.getWorldPosition(ctrlPos);
+                houki.setAttribute("animation__attract", {
+                    property: "position",
+                    to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+                    dur: 2000,
+                    easing: "easeOutQuad"
+                });
+                step = 3;
+                // ほうき音再生
+                const sound = document.querySelector('#soundAcsio');
+                sound.currentTime = 0;
+                sound.play();
+            }
+        });
     }
 });
 </script>
@@ -359,5 +355,6 @@ AFRAME.registerComponent('reset-scene', {
     }
 });
 </script>
+
 </body>
 </html>
