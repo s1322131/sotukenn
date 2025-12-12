@@ -174,9 +174,11 @@
     <script>
     AFRAME.registerComponent('subtitle-hikari', {
         init: function () {
-            const zone = document.querySelector('#hikariZone'); // 透明ボックス
+            const zone = document.querySelector('#hikariZone');
             const subtitle = document.querySelector('#hikariSubtitle');
             const images = ['hikari1.png', 'hikari2.png'];
+    
+            // ステップをコンポーネントのプロパティに
             this.step = 0; // 0: 未表示, 1: ①表示, 2: ②表示
     
             // 透明ボックスに触れたら①を表示
@@ -188,7 +190,7 @@
                 }
             });
     
-            // 字幕を押すと交互に切り替え
+            // 字幕を押すと②に切り替え
             const toggleImage = () => {
                 if (this.step === 1) {
                     subtitle.setAttribute('src', images[1]);
@@ -199,6 +201,7 @@
                 }
             };
     
+            // 字幕クリック/コントローラで切り替え
             subtitle.addEventListener('click', toggleImage);
             subtitle.addEventListener('triggerdown', toggleImage);
         }
@@ -340,4 +343,5 @@
     </script>
 </body>
 </html>
+
 
