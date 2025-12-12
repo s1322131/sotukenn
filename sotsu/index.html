@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="utf-8">
-    <title>VR 魔法杖＋先生モデル＋羽つかみ</title>
+    <title>VR 魔法杖＋先生モデル＋羽つかみ＋音声</title>
 
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
@@ -12,336 +12,352 @@
 </head>
 
 <body>
-    <a-scene vr-mode-ui="enabled: true" wand-light-control physics="debug: true">
+<a-scene vr-mode-ui="enabled: true" wand-light-control physics="debug: true">
 
-        <!-- 字幕 -->
-        <a-plane id="subtitle" src="teacher1.png" position="0 -5 -15" rotation="0 0 90"
-                 width="8" height="5" transparent="true" shader="flat" class="interactable"
-                 subtitle-switcher>
-        </a-plane>
+    <!-- 音声 -->
+    <audio id="soundRevi" src="revi.mp3"></audio>
+    <audio id="soundAcsio" src="acsio.mp3"></audio>
+    <audio id="soundRumos" src="rumos.mp3"></audio>
 
-        <!-- リセットボタン -->
-        <a-plane id="resetBtn" position="0 5 -12" width="2" height="1" color="#696969"
-                 class="interactable" reset-scene>
-            <a-text value="RESET" align="center" color="#fff" position="0 0 0.1"></a-text>
-        </a-plane>
+    <!-- 字幕 -->
+    <a-plane id="subtitle" src="teacher1.png" position="0 -5 -15" rotation="0 0 90"
+             width="8" height="5" transparent="true" shader="flat" class="interactable"
+             subtitle-switcher>
+    </a-plane>
 
-        <!-- 背景 -->
-        <a-sky src="back.png" rotation="0 -90 0"></a-sky>
+    <!-- リセットボタン -->
+    <a-plane id="resetBtn" position="0 5 -12" width="2" height="1" color="#696969"
+             class="interactable" reset-scene>
+        <a-text value="RESET" align="center" color="#fff" position="0 0 0.1"></a-text>
+    </a-plane>
 
-        <!-- カメラ -->
-        <a-entity camera look-controls cursor="rayOrigin: mouse" position="0 -3 0"></a-entity>
+    <!-- 背景 -->
+    <a-sky src="back.png" rotation="0 -90 0"></a-sky>
 
-        <!-- 先生モデル -->
-        <a-entity id="teacher" gltf-model="teacher11.glb" animation-mixer
-                  position="0 -20 -20" rotation="0 10 0" scale="14 14 14">
-        </a-entity>
+    <!-- カメラ -->
+    <a-entity camera look-controls cursor="rayOrigin: mouse" position="0 -3 0"></a-entity>
 
-        <!-- 右コントローラ -->
-        <a-entity id="rightController" laser-controls="hand: right"
-                  raycaster="objects: .interactable; lineColor: red; far: 20"
-                  class="interactable" simple-grab attract-houki>
+    <!-- 先生モデル -->
+    <a-entity id="teacher" gltf-model="teacher11.glb" animation-mixer
+              position="0 -20 -20" rotation="0 10 0" scale="14 14 14">
+    </a-entity>
 
-            <!-- 杖 -->
-            <a-entity id="wand" gltf-model="tsue2.glb" scale="0.2 0.2 0.2"
-                      position="0 0 0" rotation="150 121 180">
+    <!-- 右コントローラ -->
+    <a-entity id="rightController" laser-controls="hand: right"
+              raycaster="objects: .interactable; lineColor: red; far: 20"
+              class="interactable" simple-grab attract-houki>
 
-                <!-- 杖の光球 -->
-                <a-sphere id="wandGlow" radius="0.2" color="#eeeeff" emissive="#88ccff"
-                          emissiveIntensity="2" visible="false" position="-5 -3 -0.5">
-                </a-sphere>
+        <!-- 杖 -->
+        <a-entity id="wand" gltf-model="tsue2.glb" scale="0.2 0.2 0.2"
+                  position="0 0 0" rotation="150 121 180">
 
-                <!-- 杖ライト -->
-                <a-entity id="wandLight" light="type: point; intensity: 0; distance: 4; decay: 2"
-                          position="-5 -3 -0.5">
-                </a-entity>
+            <!-- 杖の光球 -->
+            <a-sphere id="wandGlow" radius="0.2" color="#eeeeff" emissive="#88ccff"
+                      emissiveIntensity="2" visible="false" position="-5 -3 -0.5">
+            </a-sphere>
 
+            <!-- 杖ライト -->
+            <a-entity id="wandLight" light="type: point; intensity: 0; distance: 4; decay: 2"
+                      position="-5 -3 -0.5">
             </a-entity>
+
         </a-entity>
+    </a-entity>
 
-        <!-- 光トリガーゾーン（透明） -->
-        <a-box id="hikariZone" position="-1 0 -2" width="0.5" height="1" depth="2"
-               visible="false" class="interactable hikari-zone" subtitle-hikari>
-        </a-box>
-
-        <!-- 光字幕 -->
-        <a-plane id="hikariSubtitle" position="-5 2 -10" rotation="0 20 90"
-                 width="4.5" height="2" visible="false" material="transparent:true; shader:flat">
-        </a-plane>
-
-        <!-- 羽 -->
-        <a-entity id="feather" class="interactable grab-target" gltf-model="hane.glb"
-                  position="-5 -1 -3" rotation="90 90 0" scale="0.3 0.3 0.3"
-                  dynamic-body subtitle-hane>
-        </a-entity>
-
-        <!-- 羽の字幕表示 -->
-        <a-plane id="haneSubtitle" position="-7 0 -4" rotation="0 90 90"
-                 width="3" height="1.5" visible="false" material="transparent:true; shader:flat">
-        </a-plane>
-
-        <!-- ほうき -->
-        <a-entity id="houki" class="interactable houki-target" gltf-model="houki1.glb"
-                  position="10 -3 -3" subtitle-houki scale="1 1 1">
-        </a-entity>
-
-        <!-- ほうき字幕 -->
-        <a-plane id="houkiSubtitle" position="10 2 -2" rotation="0 -40 0"
-                 width="4" height="2" visible="false" material="transparent:true; shader:flat">
-        </a-plane>
-
-        <!-- ライト -->
-        <a-entity id="ambLight" light="type: ambient; intensity: 0.8"></a-entity>
-        <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
-
-    </a-scene>
-
-    <!-- 杖ライト制御（ダブルトリガー） -->
-    <script>
-        AFRAME.registerComponent('wand-light-control', {
-            init: function () {
-                const controller = document.querySelector('#rightController');
-                this.glow = document.querySelector('#wandGlow');
-                this.light = document.querySelector('#wandLight');
-                this.amb = document.querySelector('#ambLight');
-
-                this.isOn = false;
-                this.lastClick = 0;
-                this.threshold = 300;
-
-                this.currentIntensity = 0;
-                this.targetIntensity = 0;
-
-                this.currentDistance = 1;
-                this.targetDistance = 1;
-
-                this.currentEmissive = 0;
-                this.targetEmissive = 0;
-
-                this.currentScale = 0.01;
-                this.targetScale = 0.01;
-                this.glow.setAttribute("scale", "0.01 0.01 0.01");
-
-                this.currentAmbient = 0.5;
-                this.targetAmbient = 0.5;
-
-                controller.addEventListener('triggerdown', () => {
-                    const now = performance.now();
-                    if (now - this.lastClick < this.threshold) {
-                        this.isOn = !this.isOn;
-                        if (this.isOn) {
-                            this.glow.setAttribute('visible', true);
-                            this.targetIntensity = 3.0;
-                            this.targetDistance = 6.0;
-                            this.targetEmissive = 2.0;
-                            this.targetScale = 1.2;
-                            this.targetAmbient = 2.0;
-                        } else {
-                            this.targetIntensity = 0;
-                            this.targetDistance = 1;
-                            this.targetEmissive = 0;
-                            this.targetScale = 0.01;
-                            this.targetAmbient = 0.5;
-                            setTimeout(() => this.glow.setAttribute('visible', false), 800);
-                        }
-                    }
-                    this.lastClick = now;
-                });
-            },
-
-            tick: function (time, delta) {
-                const speed = delta * 0.001;
-
-                this.currentIntensity += (this.targetIntensity - this.currentIntensity) * speed;
-                this.light.setAttribute("light", "intensity", this.currentIntensity);
-
-                this.currentDistance += (this.targetDistance - this.currentDistance) * speed;
-                this.light.setAttribute("light", "distance", this.currentDistance);
-
-                this.currentEmissive += (this.targetEmissive - this.currentEmissive) * speed;
-                this.glow.setAttribute("emissiveIntensity", this.currentEmissive);
-
-                this.currentScale += (this.targetScale - this.currentScale) * speed;
-                this.glow.setAttribute("scale", { x: this.currentScale, y: this.currentScale, z: this.currentScale });
-
-                this.currentAmbient += (this.targetAmbient - this.currentAmbient) * speed;
-                this.amb.setAttribute("light", "intensity", this.currentAmbient);
-            }
-        });
-    </script>
+    <!-- 光トリガーゾーン（透明） -->
+    <a-box id="hikariZone" position="-1 0 -2" width="0.5" height="1" depth="2"
+           visible="false" class="interactable hikari-zone" subtitle-hikari>
+    </a-box>
 
     <!-- 光字幕 -->
-    <script>
-    AFRAME.registerComponent('subtitle-hikari', {
-        init: function () {
-            const zone = document.querySelector('#hikariZone');
-            const subtitle = document.querySelector('#hikariSubtitle');
-            const images = ['hikari1.png', 'hikari2.png'];
-    
-            // ステップをコンポーネントのプロパティに
-            this.step = 0; // 0: 未表示, 1: ①表示, 2: ②表示
-    
-            // 透明ボックスに触れたら①を表示
-            zone.addEventListener('raycaster-intersected', () => {
-                if (this.step === 0) {
-                    subtitle.setAttribute('src', images[0]);
-                    subtitle.setAttribute('visible', true);
-                    this.step = 1;
-                }
-            });
-    
-            // 字幕を押すと②に切り替え
-            const toggleImage = () => {
-                if (this.step === 1) {
-                    subtitle.setAttribute('src', images[1]);
-                    this.step = 2;
-                } else if (this.step === 2) {
-                    subtitle.setAttribute('src', images[0]);
-                    this.step = 1;
-                }
-            };
-    
-            // 字幕クリック/コントローラで切り替え
-            subtitle.addEventListener('click', toggleImage);
-            subtitle.addEventListener('triggerdown', toggleImage);
-        }
-    });
-    </script>
+    <a-plane id="hikariSubtitle" position="-5 2 -10" rotation="0 20 90"
+             width="4.5" height="2" visible="false" material="transparent:true; shader:flat">
+    </a-plane>
+
+    <!-- 羽 -->
+    <a-entity id="feather" class="interactable grab-target" gltf-model="hane.glb"
+              position="-5 -1 -3" rotation="90 90 0" scale="0.3 0.3 0.3"
+              dynamic-body subtitle-hane>
+    </a-entity>
+
+    <!-- 羽の字幕表示 -->
+    <a-plane id="haneSubtitle" position="-7 0 -4" rotation="0 90 90"
+             width="3" height="1.5" visible="false" material="transparent:true; shader:flat">
+    </a-plane>
+
+    <!-- ほうき -->
+    <a-entity id="houki" class="interactable houki-target" gltf-model="houki1.glb"
+              position="10 -3 -3" subtitle-houki scale="1 1 1">
+    </a-entity>
 
     <!-- ほうき字幕 -->
-    <script>
-        AFRAME.registerComponent('subtitle-houki', {
-            init: function () {
-                const houki = this.el;
-                const subtitle = document.querySelector('#houkiSubtitle');
-                const controller = document.querySelector('#rightController');
-                let step = 0;
+    <a-plane id="houkiSubtitle" position="10 2 -2" rotation="0 -40 0"
+             width="4" height="2" visible="false" material="transparent:true; shader:flat">
+    </a-plane>
 
-                houki.addEventListener('raycaster-intersected', () => {
-                    if (step === 0) {
-                        subtitle.setAttribute('src', 'houki3.png');
-                        subtitle.setAttribute('visible', true);
-                        step = 1;
-                    }
-                });
+    <!-- ライト -->
+    <a-entity id="ambLight" light="type: ambient; intensity: 0.8"></a-entity>
+    <a-entity light="type: directional; intensity: 0.6" position="1 3 2"></a-entity>
 
-                controller.addEventListener('triggerdown', () => {
-                    const hits = controller.components.raycaster.intersections;
-                    if (!hits.length || hits[0].object.el !== houki) return;
+</a-scene>
 
-                    if (step === 1) {
-                        subtitle.setAttribute('src', 'houki4.png');
-                        step = 2;
-                    } else if (step === 2) {
-                        subtitle.setAttribute('visible', false);
-                        const ctrlPos = new THREE.Vector3();
-                        controller.object3D.getWorldPosition(ctrlPos);
-                        houki.setAttribute("animation__attract", {
-                            property: "position",
-                            to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
-                            dur: 2000,
-                            easing: "easeOutQuad"
-                        });
-                        step = 3;
-                    }
-                });
-            }
-        });
-    </script>
+<!-- 杖ライト制御 -->
+<script>
+AFRAME.registerComponent('wand-light-control', {
+    init: function () {
+        const controller = document.querySelector('#rightController');
+        this.glow = document.querySelector('#wandGlow');
+        this.light = document.querySelector('#wandLight');
+        this.amb = document.querySelector('#ambLight');
+        this.sound = document.querySelector('#soundRumos'); // 光音
 
-    <!-- 羽字幕 -->
-    <script>
-        AFRAME.registerComponent('subtitle-hane', {
-            init: function () {
-                const hane = this.el;
-                const subtitle = document.querySelector('#haneSubtitle');
-                const controller = document.querySelector('#rightController');
+        this.isOn = false;
+        this.lastClick = 0;
+        this.threshold = 300;
 
-                this.step = 0;
-                this.isRising = false;
-                this.riseStartY = 0;
-                this.riseTargetY = 0;
+        this.currentIntensity = 0;
+        this.targetIntensity = 0;
 
-                hane.addEventListener('raycaster-intersected', () => {
-                    if (this.step === 0) {
-                        subtitle.setAttribute('src', 'hane1.png');
-                        subtitle.setAttribute('visible', true);
-                        this.step = 1;
-                    }
-                });
+        this.currentDistance = 1;
+        this.targetDistance = 1;
 
-                controller.addEventListener('triggerdown', () => {
-                    const hits = controller.components.raycaster.intersections;
-                    if (!hits.length || hits[0].object.el !== hane) return;
+        this.currentEmissive = 0;
+        this.targetEmissive = 0;
 
-                    if (this.step === 1) {
-                        subtitle.setAttribute('src', 'hane2.png');
-                        this.step = 2;
-                        return;
-                    }
+        this.currentScale = 0.01;
+        this.targetScale = 0.01;
+        this.glow.setAttribute("scale", "0.01 0.01 0.01");
 
-                    if (this.step === 2) {
-                        subtitle.setAttribute('visible', false);
-                        hane.removeAttribute("dynamic-body");
-                        this.startRise();
-                        this.step = 2;
-                    }
-                });
-            },
+        this.currentAmbient = 0.5;
+        this.targetAmbient = 0.5;
 
-            startRise: function () {
-                this.isRising = true;
-                const pos = this.el.object3D.position;
-                this.riseStartY = pos.y;
-                this.riseTargetY = pos.y + 2.0;
-                this.riseTime = 0;
-            },
+        controller.addEventListener('triggerdown', () => {
+            const now = performance.now();
+            if (now - this.lastClick < this.threshold) {
+                this.isOn = !this.isOn;
+                if (this.isOn) {
+                    this.glow.setAttribute('visible', true);
+                    this.targetIntensity = 3.0;
+                    this.targetDistance = 6.0;
+                    this.targetEmissive = 2.0;
+                    this.targetScale = 1.2;
+                    this.targetAmbient = 2.0;
 
-            tick: function (time, delta) {
-                if (!this.isRising) return;
-                const hane = this.el.object3D;
-                this.riseTime += delta / 2500;
-                if (this.riseTime >= 1) {
-                    this.riseTime = 1;
-                    this.isRising = false;
+                    this.sound.currentTime = 0;
+                    this.sound.play();
+                } else {
+                    this.targetIntensity = 0;
+                    this.targetDistance = 1;
+                    this.targetEmissive = 0;
+                    this.targetScale = 0.01;
+                    this.targetAmbient = 0.5;
+                    setTimeout(() => this.glow.setAttribute('visible', false), 800);
                 }
-                hane.position.y = THREE.MathUtils.lerp(this.riseStartY, this.riseTargetY, this.riseTime);
+            }
+            this.lastClick = now;
+        });
+    },
+
+    tick: function (time, delta) {
+        const speed = delta * 0.001;
+
+        this.currentIntensity += (this.targetIntensity - this.currentIntensity) * speed;
+        this.light.setAttribute("light", "intensity", this.currentIntensity);
+
+        this.currentDistance += (this.targetDistance - this.currentDistance) * speed;
+        this.light.setAttribute("light", "distance", this.currentDistance);
+
+        this.currentEmissive += (this.targetEmissive - this.currentEmissive) * speed;
+        this.glow.setAttribute("emissiveIntensity", this.currentEmissive);
+
+        this.currentScale += (this.targetScale - this.currentScale) * speed;
+        this.glow.setAttribute("scale", { x: this.currentScale, y: this.currentScale, z: this.currentScale });
+
+        this.currentAmbient += (this.targetAmbient - this.currentAmbient) * speed;
+        this.amb.setAttribute("light", "intensity", this.currentAmbient);
+    }
+});
+</script>
+
+<!-- 光字幕 -->
+<script>
+AFRAME.registerComponent('subtitle-hikari', {
+    init: function () {
+        const zone = document.querySelector('#hikariZone');
+        const subtitle = document.querySelector('#hikariSubtitle');
+        const images = ['hikari1.png', 'hikari2.png'];
+        this.step = 0;
+
+        zone.addEventListener('raycaster-intersected', () => {
+            if (this.step === 0) {
+                subtitle.setAttribute('src', images[0]);
+                subtitle.setAttribute('visible', true);
+                this.step = 1;
             }
         });
-    </script>
 
-    <!-- PNG切り替え -->
-    <script>
-        AFRAME.registerComponent('subtitle-switcher', {
-            init: function () {
-                const el = this.el;
-                const subtitles = ['teacher1.png', 'teacher2.png'];
-                let index = 0;
+        const toggleImage = () => {
+            if (this.step === 1) {
+                subtitle.setAttribute('src', images[1]);
+                this.step = 2;
+            } else if (this.step === 2) {
+                subtitle.setAttribute('src', images[0]);
+                this.step = 1;
+            }
+        };
 
-                el.addEventListener('click', () => {
-                    index = (index + 1) % subtitles.length;
-                    el.setAttribute('src', subtitles[index]);
+        subtitle.addEventListener('click', () => {
+            toggleImage();
+            document.querySelector('#soundRumos').play();
+        });
+        subtitle.addEventListener('triggerdown', () => {
+            toggleImage();
+            document.querySelector('#soundRumos').play();
+        });
+    }
+});
+</script>
+
+<!-- ほうき字幕 -->
+<script>
+AFRAME.registerComponent('subtitle-houki', {
+    init: function () {
+        const houki = this.el;
+        const subtitle = document.querySelector('#houkiSubtitle');
+        const controller = document.querySelector('#rightController');
+        const sound = document.querySelector('#soundAcsio');
+        let step = 0;
+
+        houki.addEventListener('raycaster-intersected', () => {
+            if (step === 0) {
+                subtitle.setAttribute('src', 'houki3.png');
+                subtitle.setAttribute('visible', true);
+                step = 1;
+            }
+        });
+
+        controller.addEventListener('triggerdown', () => {
+            const hits = controller.components.raycaster.intersections;
+            if (!hits.length || hits[0].object.el !== houki) return;
+
+            if (step === 1) {
+                subtitle.setAttribute('src', 'houki4.png');
+                step = 2;
+            } else if (step === 2) {
+                subtitle.setAttribute('visible', false);
+                const ctrlPos = new THREE.Vector3();
+                controller.object3D.getWorldPosition(ctrlPos);
+                houki.setAttribute("animation__attract", {
+                    property: "position",
+                    to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+                    dur: 2000,
+                    easing: "easeOutQuad"
                 });
+                step = 3;
 
-                el.addEventListener('triggerdown', () => {
-                    index = (index + 1) % subtitles.length;
-                    el.setAttribute('src', subtitles[index]);
-                });
+                sound.currentTime = 0;
+                sound.play();
             }
         });
-    </script>
+    }
+});
+</script>
 
-    <!-- リセット -->
-    <script>
-        AFRAME.registerComponent('reset-scene', {
-            init: function () {
-                const el = this.el;
-                el.addEventListener('click', () => location.reload());
-                el.addEventListener('triggerdown', () => location.reload());
+<!-- 羽字幕 -->
+<script>
+AFRAME.registerComponent('subtitle-hane', {
+    init: function () {
+        const hane = this.el;
+        const subtitle = document.querySelector('#haneSubtitle');
+        const controller = document.querySelector('#rightController');
+        const sound = document.querySelector('#soundRevi');
+
+        this.step = 0;
+        this.isRising = false;
+        this.riseStartY = 0;
+        this.riseTargetY = 0;
+
+        hane.addEventListener('raycaster-intersected', () => {
+            if (this.step === 0) {
+                subtitle.setAttribute('src', 'hane1.png');
+                subtitle.setAttribute('visible', true);
+                this.step = 1;
             }
         });
-    </script>
+
+        controller.addEventListener('triggerdown', () => {
+            const hits = controller.components.raycaster.intersections;
+            if (!hits.length || hits[0].object.el !== hane) return;
+
+            if (this.step === 1) {
+                subtitle.setAttribute('src', 'hane2.png');
+                this.step = 2;
+                return;
+            }
+
+            if (this.step === 2) {
+                subtitle.setAttribute('visible', false);
+                hane.removeAttribute("dynamic-body");
+                this.startRise();
+                this.step = 2;
+
+                sound.currentTime = 0;
+                sound.play();
+            }
+        });
+    },
+
+    startRise: function () {
+        this.isRising = true;
+        const pos = this.el.object3D.position;
+        this.riseStartY = pos.y;
+        this.riseTargetY = pos.y + 2.0;
+        this.riseTime = 0;
+    },
+
+    tick: function (time, delta) {
+        if (!this.isRising) return;
+        const hane = this.el.object3D;
+        this.riseTime += delta / 2500;
+        if (this.riseTime >= 1) {
+            this.riseTime = 1;
+            this.isRising = false;
+        }
+        hane.position.y = THREE.MathUtils.lerp(this.riseStartY, this.riseTargetY, this.riseTime);
+    }
+});
+</script>
+
+<!-- PNG切り替え -->
+<script>
+AFRAME.registerComponent('subtitle-switcher', {
+    init: function () {
+        const el = this.el;
+        const subtitles = ['teacher1.png', 'teacher2.png'];
+        let index = 0;
+
+        el.addEventListener('click', () => {
+            index = (index + 1) % subtitles.length;
+            el.setAttribute('src', subtitles[index]);
+        });
+
+        el.addEventListener('triggerdown', () => {
+            index = (index + 1) % subtitles.length;
+            el.setAttribute('src', subtitles[index]);
+        });
+    }
+});
+</script>
+
+<!-- リセット -->
+<script>
+AFRAME.registerComponent('reset-scene', {
+    init: function () {
+        const el = this.el;
+        el.addEventListener('click', () => location.reload());
+        el.addEventListener('triggerdown', () => location.reload());
+    }
+});
+</script>
 </body>
 </html>
-
-
