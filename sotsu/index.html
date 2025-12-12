@@ -180,34 +180,36 @@
 
     <!-- 光字幕 -->
     <script>
-        AFRAME.registerComponent('subtitle-hikari', {
-            init: function () {
-                const zone = this.el; // トリガーゾーン
-                const subtitle = document.querySelector('#hikariSubtitle');
-                const controller = document.querySelector('#rightController');
-                let step = 0; // 0:未接触 → 1:hikari1 → 2:hikari2
-
-                // 視線 or ポインターが当たったら hikari1
-                zone.addEventListener('raycaster-intersected', () => {
-                    if (step === 0) {
-                        subtitle.setAttribute('src', 'hikari1.png');
-                        subtitle.setAttribute('visible', true);
-                        step = 1;
-                    }
-                });
-
-                // トリガーで hikari2
-                controller.addEventListener('triggerdown', () => {
-                    const hits = controller.components.raycaster.intersections;
-                    const touched = hits.some(h => h.object.el === zone);
-                    if (!touched) return;
-                    if (step === 1) {
-                        subtitle.setAttribute('src', 'hikari2.png');
-                        step = 2;
-                    }
-                });
-            }
+    AFRAME.registerComponent('subtitle-hikari', {
+      init: function () {
+        const zone = this.el;
+        const subtitle = document.querySelector('#hikariSubtitle');
+        const controller = document.querySelector('#rightController');
+    
+        const images = ['hikari1.png', 'hikari2.png'];
+        let index = 0;
+        let entered = false;
+    
+        // 視線を当てたら1枚目を表示
+        zone.addEventListener('raycaster-intersected', () => {
+          if (!entered) {
+            subtitle.setAttribute('src', images[0]);
+            subtitle.setAttribute('visible', true);
+            entered = true;
+          }
         });
+    
+        // トリガーで 1 ↔ 2 無限ループ
+        controller.addEventListener('triggerdown', () => {
+          const hits = controller.components.raycaster.intersections;
+          const touched = hits.some(h => h.object.el === zone);
+          if (!touched) return;
+    
+          index = (index + 1) % images.length;
+          subtitle.setAttribute('src', images[index]);
+        });
+      }
+    });
     </script>
 
     <!-- ほうき字幕 -->
@@ -353,3 +355,4 @@
     </script>
 </body>
 </html>
+
