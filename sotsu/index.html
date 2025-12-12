@@ -83,7 +83,7 @@
     <!-- 光トリガーゾーン（透明） -->
     <a-box id="hikariZone"
            position="-1 0 -2"
-           width="1" height="1" depth="2"
+           width="2" height="2" depth="2"
            visible="false"
            class="interactable hikari-zone"
            subtitle-hikari>
@@ -261,12 +261,13 @@
       /* トリガーで hikari2 */
       controller.addEventListener('triggerdown', () => {
         const hits = controller.components.raycaster.intersections;
-        if (!hits.length || hits[0].object.el !== zone) return;
-  
+      
+        const touched = hits.some(h => h.object.el === zone);
+        if (!touched) return;
+      
         if (step === 1) {
           subtitle.setAttribute('src', 'hikari2.png');
           step = 2;
-          return;
         }
       });
     }
@@ -443,6 +444,7 @@
 
 </body>
 </html>
+
 
 
 
