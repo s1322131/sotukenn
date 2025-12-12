@@ -80,6 +80,25 @@
       </a-entity>
     </a-entity>
 
+    <!-- 光トリガーゾーン（透明） -->
+    <a-box id="hikariZone"
+           position="-4 0 -2"
+           width="2" height="2" depth="2"
+           visible="false"
+           class="interactable hikari-zone"
+           subtitle-hikari>
+    </a-box>
+
+    
+    <!-- 光 字幕 -->
+    <a-plane id="hikariSubtitle"
+             position="-4 2 -2"
+             rotation="0 0 0"
+             width="4" height="2"
+             visible="false"
+             material="transparent:true; shader:flat">
+    </a-plane>
+    
     <!-- 羽 -->
     <a-entity id="feather"
               class="interactable grab-target"
@@ -219,6 +238,41 @@
       }
     });
     </script>
+
+  <!-- 光字幕 -->
+  <script>
+  AFRAME.registerComponent('subtitle-hikari', {
+    init: function () {
+      const zone = this.el;                        // トリガーゾーン
+      const subtitle = document.querySelector('#hikariSubtitle');
+      const controller = document.querySelector('#rightController');
+  
+      let step = 0;  // 0：未接触 → 1：hikari1 → 2：hikari2
+  
+      /* 視線 or ポインターが当たったら hikari1 */
+      zone.addEventListener('raycaster-intersected', () => {
+        if (step === 0) {
+          subtitle.setAttribute('src', 'hikari1.png');
+          subtitle.setAttribute('visible', true);
+          step = 1;
+        }
+      });
+  
+      /* トリガーで hikari2 */
+      controller.addEventListener('triggerdown', () => {
+        const hits = controller.components.raycaster.intersections;
+        if (!hits.length || hits[0].object.el !== zone) return;
+  
+        if (step === 1) {
+          subtitle.setAttribute('src', 'hikari2.png');
+          step = 2;
+          return;
+        }
+      });
+    }
+  });
+  </script>
+
 
   <!-- ほうき字幕 -->
   <script>
@@ -389,6 +443,7 @@
 
 </body>
 </html>
+
 
 
 
