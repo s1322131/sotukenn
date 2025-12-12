@@ -16,7 +16,8 @@
 
         <!-- 字幕 -->
         <a-plane id="subtitle" src="teacher1.png" position="0 -5 -15" rotation="0 0 90"
-                 width="8" height="5" transparent="true" shader="flat" class="interactable" subtitle-switcher>
+                 width="8" height="5" transparent="true" shader="flat" class="interactable"
+                 subtitle-switcher>
         </a-plane>
 
         <!-- リセットボタン -->
@@ -36,18 +37,18 @@
                   position="0 -20 -20" rotation="0 10 0" scale="14 14 14">
         </a-entity>
 
-        <!-- 右コントローラ（モデル非表示、レーザーは残す） -->
-        <a-entity id="rightController" 
-                  laser-controls="hand: right; model: false"
+        <!-- 右コントローラ -->
+        <a-entity id="rightController" laser-controls="hand: right"
                   raycaster="objects: .interactable; lineColor: red; far: 20"
                   class="interactable" simple-grab attract-houki>
 
             <!-- 杖 -->
-            <a-entity id="wand" gltf-model="tsue2.glb" scale="0.2 0.2 0.2" position="0 0 0" rotation="150 121 180">
+            <a-entity id="wand" gltf-model="tsue2.glb" scale="0.2 0.2 0.2"
+                      position="0 0 0" rotation="150 121 180">
 
                 <!-- 杖の光球 -->
-                <a-sphere id="wandGlow" radius="0.2" color="#eeeeff" emissive="#88ccff" emissiveIntensity="2"
-                          visible="false" position="-5 -3 -0.5">
+                <a-sphere id="wandGlow" radius="0.2" color="#eeeeff" emissive="#88ccff"
+                          emissiveIntensity="2" visible="false" position="-5 -3 -0.5">
                 </a-sphere>
 
                 <!-- 杖ライト -->
@@ -59,13 +60,13 @@
         </a-entity>
 
         <!-- 光トリガーゾーン（透明） -->
-        <a-box id="hikariZone" position="-1 0 -2" width="0.5" height="1" depth="2" visible="false"
-               class="interactable hikari-zone" subtitle-hikari>
+        <a-box id="hikariZone" position="-1 0 -2" width="0.5" height="1" depth="2"
+               visible="false" class="interactable hikari-zone" subtitle-hikari>
         </a-box>
 
-        <!-- 光 字幕 -->
-        <a-plane id="hikariSubtitle" position="-5 2 -10" rotation="0 20 90" width="4.5" height="2"
-                 visible="false" material="transparent:true; shader:flat">
+        <!-- 光字幕 -->
+        <a-plane id="hikariSubtitle" position="-5 2 -10" rotation="0 20 90"
+                 width="4.5" height="2" visible="false" material="transparent:true; shader:flat">
         </a-plane>
 
         <!-- 羽 -->
@@ -75,8 +76,8 @@
         </a-entity>
 
         <!-- 羽の字幕表示 -->
-        <a-plane id="haneSubtitle" position="-7 0 -4" rotation="0 90 90" width="3" height="1.5"
-                 visible="false" material="transparent:true; shader:flat">
+        <a-plane id="haneSubtitle" position="-7 0 -4" rotation="0 90 90"
+                 width="3" height="1.5" visible="false" material="transparent:true; shader:flat">
         </a-plane>
 
         <!-- ほうき -->
@@ -85,8 +86,8 @@
         </a-entity>
 
         <!-- ほうき字幕 -->
-        <a-plane id="houkiSubtitle" position="10 2 -2" rotation="0 -40 0" width="4" height="2"
-                 visible="false" material="transparent:true; shader:flat">
+        <a-plane id="houkiSubtitle" position="10 2 -2" rotation="0 -40 0"
+                 width="4" height="2" visible="false" material="transparent:true; shader:flat">
         </a-plane>
 
         <!-- ライト -->
@@ -102,30 +103,25 @@
                 const controller = document.querySelector('#rightController');
                 this.glow = document.querySelector('#wandGlow');
                 this.light = document.querySelector('#wandLight');
-                this.amb = document.querySelector('#ambLight'); // ambient light
+                this.amb = document.querySelector('#ambLight');
 
                 this.isOn = false;
                 this.lastClick = 0;
                 this.threshold = 300;
 
-                // ライト明るさ
                 this.currentIntensity = 0;
                 this.targetIntensity = 0;
 
-                // ライトの照射距離
                 this.currentDistance = 1;
                 this.targetDistance = 1;
 
-                // 光球の発光
                 this.currentEmissive = 0;
                 this.targetEmissive = 0;
 
-                // 光球サイズ
                 this.currentScale = 0.01;
                 this.targetScale = 0.01;
                 this.glow.setAttribute("scale", "0.01 0.01 0.01");
 
-                // Ambient light
                 this.currentAmbient = 0.5;
                 this.targetAmbient = 0.5;
 
@@ -156,23 +152,18 @@
             tick: function (time, delta) {
                 const speed = delta * 0.001;
 
-                // ライト明るさ
                 this.currentIntensity += (this.targetIntensity - this.currentIntensity) * speed;
                 this.light.setAttribute("light", "intensity", this.currentIntensity);
 
-                // ライト照射距離
                 this.currentDistance += (this.targetDistance - this.currentDistance) * speed;
                 this.light.setAttribute("light", "distance", this.currentDistance);
 
-                // 光球の明るさ
                 this.currentEmissive += (this.targetEmissive - this.currentEmissive) * speed;
                 this.glow.setAttribute("emissiveIntensity", this.currentEmissive);
 
-                // 光球の大きさ
                 this.currentScale += (this.targetScale - this.currentScale) * speed;
                 this.glow.setAttribute("scale", { x: this.currentScale, y: this.currentScale, z: this.currentScale });
 
-                // 環境光
                 this.currentAmbient += (this.targetAmbient - this.currentAmbient) * speed;
                 this.amb.setAttribute("light", "intensity", this.currentAmbient);
             }
@@ -183,13 +174,12 @@
     <script>
         AFRAME.registerComponent('subtitle-hikari', {
             init: function () {
-                const zone = document.querySelector('#hikariZone'); // 透明ボックス
+                const zone = document.querySelector('#hikariZone');
                 const subtitle = document.querySelector('#hikariSubtitle');
                 const controller = document.querySelector('#rightController');
                 const images = ['hikari1.png', 'hikari2.png'];
-                let step = 0; // 0: 未表示, 1: ①表示, 2: ②表示
+                let step = 0;
 
-                // 透明ボックスに触れたら①を表示
                 zone.addEventListener('raycaster-intersected', () => {
                     if (step === 0) {
                         subtitle.setAttribute('src', images[0]);
@@ -198,7 +188,6 @@
                     }
                 });
 
-                // 字幕を押すと交互に切り替え
                 const toggleImage = () => {
                     if (step === 1) {
                         subtitle.setAttribute('src', images[1]);
@@ -269,7 +258,6 @@
                 this.riseStartY = 0;
                 this.riseTargetY = 0;
 
-                // 視線を当てたら字幕1
                 hane.addEventListener('raycaster-intersected', () => {
                     if (this.step === 0) {
                         subtitle.setAttribute('src', 'hane1.png');
@@ -278,19 +266,16 @@
                     }
                 });
 
-                // トリガー操作
                 controller.addEventListener('triggerdown', () => {
                     const hits = controller.components.raycaster.intersections;
                     if (!hits.length || hits[0].object.el !== hane) return;
 
-                    // 2段階目 → 掴む前の説明
                     if (this.step === 1) {
                         subtitle.setAttribute('src', 'hane2.png');
                         this.step = 2;
                         return;
                     }
 
-                    // 3段階目 → 上昇開始
                     if (this.step === 2) {
                         subtitle.setAttribute('visible', false);
                         hane.removeAttribute("dynamic-body");
@@ -300,25 +285,23 @@
                 });
             },
 
-            // 上昇準備
             startRise: function () {
                 this.isRising = true;
                 const pos = this.el.object3D.position;
                 this.riseStartY = pos.y;
-                this.riseTargetY = pos.y + 2.0; // 上昇量
+                this.riseTargetY = pos.y + 2.0;
                 this.riseTime = 0;
             },
 
             tick: function (time, delta) {
                 if (!this.isRising) return;
                 const hane = this.el.object3D;
-                this.riseTime += delta / 2500; // 上昇スピード
+                this.riseTime += delta / 2500;
                 if (this.riseTime >= 1) {
                     this.riseTime = 1;
                     this.isRising = false;
                 }
-                const newY = THREE.MathUtils.lerp(this.riseStartY, this.riseTargetY, this.riseTime);
-                hane.position.y = newY;
+                hane.position.y = THREE.MathUtils.lerp(this.riseStartY, this.riseTargetY, this.riseTime);
             }
         });
     </script>
