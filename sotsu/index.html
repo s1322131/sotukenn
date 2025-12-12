@@ -63,7 +63,7 @@
         </a-box>
 
         <!-- 光 字幕 -->
-        <a-plane id="hikariSubtitle" position="-3 2 -15" rotation="0 0 90" width="4" height="2"
+        <a-plane id="hikariSubtitle" position="-5 2 -12" rotation="0 0 90" width="4" height="2"
                  visible="false" material="transparent:true; shader:flat">
         </a-plane>
 
@@ -213,101 +213,112 @@
     </script>
 
     
+    <!-- ほうき字幕 -->
     <script>
-      // 羽字幕（上昇も維持）
-      AFRAME.registerComponent('subtitle-hane', {
+    AFRAME.registerComponent('subtitle-houki', {
         init: function () {
-          const hane = this.el;
-          const subtitle = document.querySelector('#haneSubtitle');
-          const controller = document.querySelector('#rightController');
+            const houki = this.el;
+            const subtitle = document.querySelector('#houkiSubtitle');
+            const controller = document.querySelector('#rightController');
+            let step = 0;
     
-          const subtitles = ['hane1.png', 'hane2.png']; // 表示する字幕
-          let index = 0;
-          this.isRising = false;
-          this.riseStartY = 0;
-          this.riseTargetY = 0;
+            houki.addEventListener('raycaster-intersected', () => {
+                if (step === 0) {
+                    subtitle.setAttribute('src', 'houki3.png');
+                    subtitle.setAttribute('visible', true);
+                    step = 1;
+                }
+            });
     
-          // 視線を当てたら最初の字幕表示
-          hane.addEventListener('raycaster-intersected', () => {
-            subtitle.setAttribute('src', subtitles[index]);
-            subtitle.setAttribute('visible', true);
-          });
+            controller.addEventListener('triggerdown', () => {
+                const hits = controller.components.raycaster.intersections;
+                if (!hits.length || hits[0].object.el !== houki) return;
     
-          // トリガーで交互に字幕切り替え＋上昇開始
-          controller.addEventListener('triggerdown', () => {
-            const hits = controller.components.raycaster.intersections;
-            if (!hits.length || hits[0].object.el !== hane) return;
+                if (step === 1) {
+                    subtitle.setAttribute('src', 'houki4.png');
+                    step = 2;
+                } else if (step === 2) {
+                    subtitle.setAttribute('visible', false);
+                    const ctrlPos = new THREE.Vector3();
+                    controller.object3D.getWorldPosition(ctrlPos);
+                    houki.setAttribute("animation__attract", {
+                        property: "position",
+                        to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+                        dur: 2000,
+                        easing: "easeOutQuad"
+                    });
+                    step = 3;
+                }
+            });
+        }
+    });
+    </script>
     
-            index = (index + 1) % subtitles.length;
-            subtitle.setAttribute('src', subtitles[index]);
-            subtitle.setAttribute('visible', true);
+    <!-- 羽字幕 -->
+    <script>
+    AFRAME.registerComponent('subtitle-hane', {
+        init: function () {
+            const hane = this.el;
+            const subtitle = document.querySelector('#haneSubtitle');
+            const controller = document.querySelector('#rightController');
     
-            // 上昇開始（何回でも可能）
-            this.startRise();
-          });
+            this.step = 0;
+            this.isRising = false;
+            this.riseStartY = 0;
+            this.riseTargetY = 0;
+    
+            // 視線を当てたら字幕1
+            hane.addEventListener('raycaster-intersected', () => {
+                if (this.step === 0) {
+                    subtitle.setAttribute('src', 'hane1.png');
+                    subtitle.setAttribute('visible', true);
+                    this.step = 1;
+                }
+            });
+    
+            // トリガー操作
+            controller.addEventListener('triggerdown', () => {
+                const hits = controller.components.raycaster.intersections;
+                if (!hits.length || hits[0].object.el !== hane) return;
+    
+                // 2段階目 → 掴む前の説明
+                if (this.step === 1) {
+                    subtitle.setAttribute('src', 'hane2.png');
+                    this.step = 2;
+                    return;
+                }
+    
+                // 3段階目 → 上昇開始
+                if (this.step === 2) {
+                    subtitle.setAttribute('visible', false);
+                    hane.removeAttribute("dynamic-body");
+                    this.startRise();
+                    this.step = 2;
+                }
+            });
         },
     
+        // 上昇準備
         startRise: function () {
-          this.isRising = true;
-          const pos = this.el.object3D.position;
-          this.riseStartY = pos.y;
-          this.riseTargetY = pos.y + 2.0; // 上昇量
-          this.riseTime = 0;
-          this.el.removeAttribute('dynamic-body'); // 物理削除
+            this.isRising = true;
+            const pos = this.el.object3D.position;
+            this.riseStartY = pos.y;
+            this.riseTargetY = pos.y + 2.0; // 上昇量
+            this.riseTime = 0;
         },
     
         tick: function (time, delta) {
-          if (!this.isRising) return;
-          const hane = this.el.object3D;
-          this.riseTime += delta / 2500;
-          if (this.riseTime >= 1) {
-            this.riseTime = 1;
-            this.isRising = false;
-          }
-          const newY = THREE.MathUtils.lerp(this.riseStartY, this.riseTargetY, this.riseTime);
-          hane.position.y = newY;
-        }
-      });
-    
-      // ほうき字幕（吸引アニメーションも維持）
-      AFRAME.registerComponent('subtitle-houki', {
-        init: function () {
-          const houki = this.el;
-          const subtitle = document.querySelector('#houkiSubtitle');
-          const controller = document.querySelector('#rightController');
-    
-          const subtitles = ['houki3.png', 'houki4.png']; // 表示する字幕
-          let index = 0;
-    
-          // 視線を当てたら最初の字幕表示
-          houki.addEventListener('raycaster-intersected', () => {
-            subtitle.setAttribute('src', subtitles[index]);
-            subtitle.setAttribute('visible', true);
-          });
-    
-          // トリガーで交互に字幕切り替え＋吸引アニメーション
-          controller.addEventListener('triggerdown', () => {
-            const hits = controller.components.raycaster.intersections;
-            if (!hits.length || hits[0].object.el !== houki) return;
-    
-            index = (index + 1) % subtitles.length;
-            subtitle.setAttribute('src', subtitles[index]);
-            subtitle.setAttribute('visible', true);
-    
-            // 吸引アニメーション（最後の字幕でのみ動かす場合は条件追加）
-            if (index === subtitles.length - 1) {
-              const ctrlPos = new THREE.Vector3();
-              controller.object3D.getWorldPosition(ctrlPos);
-              houki.setAttribute('animation__attract', {
-                property: 'position',
-                to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
-                dur: 2000,
-                easing: 'easeOutQuad'
-              });
+            if (!this.isRising) return;
+            const hane = this.el.object3D;
+            this.riseTime += delta / 2500; // 上昇スピード
+            if (this.riseTime >= 1) {
+                this.riseTime = 1;
+                this.isRising = false;
             }
-          });
+            const newY = THREE.MathUtils.lerp(this.riseStartY, this.riseTargetY, this.riseTime);
+            hane.position.y = newY;
         }
-      });
+    });
     </script>
 
 
@@ -344,6 +355,7 @@
     </script>
 </body>
 </html>
+
 
 
 
