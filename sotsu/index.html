@@ -83,7 +83,7 @@
     <!-- 光トリガーゾーン（透明） -->
     <a-box id="hikariZone"
            position="-1 0 -2"
-           width="2" height="2" depth="2"
+           width="1" height="1" depth="2"
            visible="false"
            class="interactable hikari-zone"
            subtitle-hikari>
@@ -92,7 +92,7 @@
     
     <!-- 光 字幕 -->
     <a-plane id="hikariSubtitle"
-             position="-2 2 -4"
+             position="-2 2 -15"
              rotation="0 0 90"
              width="3" height="1.5"
              visible="false"
@@ -131,7 +131,7 @@
     <!-- ほうき字幕 -->
     <a-plane id="houkiSubtitle"
              position="10 2 -2"
-             rotation="0 -30 0"
+             rotation="0 -40 0"
              width="4" height="2"
              visible="false"
              material="transparent:true; shader:flat">
@@ -243,32 +243,31 @@
   <script>
   AFRAME.registerComponent('subtitle-hikari', {
     init: function () {
-      const zone = this.el;                        // トリガーゾーン
+      const zone = this.el;
       const subtitle = document.querySelector('#hikariSubtitle');
       const controller = document.querySelector('#rightController');
   
-      let step = 0;  // 0：未接触 → 1：hikari1 → 2：hikari2
+      const images = ['hikari1.png', 'hikari2.png'];
+      let index = 0;
+      let entered = false;
   
-      /* 視線 or ポインターが当たったら hikari1 */
+      // 視線を当てたら1枚目を表示
       zone.addEventListener('raycaster-intersected', () => {
-        if (step === 0) {
-          subtitle.setAttribute('src', 'hikari1.png');
+        if (!entered) {
+          subtitle.setAttribute('src', images[0]);
           subtitle.setAttribute('visible', true);
-          step = 1;
+          entered = true;
         }
       });
   
-      /* トリガーで hikari2 */
+      // トリガーで 1 ↔ 2 無限ループ
       controller.addEventListener('triggerdown', () => {
         const hits = controller.components.raycaster.intersections;
-      
         const touched = hits.some(h => h.object.el === zone);
         if (!touched) return;
-      
-        if (step === 1) {
-          subtitle.setAttribute('src', 'hikari2.png');
-          step = 2;
-        }
+  
+        index = (index + 1) % images.length;
+        subtitle.setAttribute('src', images[index]);
       });
     }
   });
@@ -277,133 +276,79 @@
 
   <!-- ほうき字幕 -->
   <script>
-    AFRAME.registerComponent('subtitle-houki', {
-      init: function () {
-        const houki = this.el;
-        const subtitle = document.querySelector('#houkiSubtitle');
-        const controller = document.querySelector('#rightController');
-
-        let step = 0;
-
-        houki.addEventListener('raycaster-intersected', () => {
-          if (step === 0) {
-            subtitle.setAttribute('src', 'houki3.png');
-            subtitle.setAttribute('visible', true);
-            step = 1;
-          }
-        });
-
-        controller.addEventListener('triggerdown', () => {
-          const hits = controller.components.raycaster.intersections;
-          if (!hits.length || hits[0].object.el !== houki) return;
-
-          if (step === 1) {
-            subtitle.setAttribute('src', 'houki4.png');
-            step = 2;
-
-          } else if (step === 2) {
-            subtitle.setAttribute('visible', false);
-
-            const ctrlPos = new THREE.Vector3();
-            controller.object3D.getWorldPosition(ctrlPos);
-
-            houki.setAttribute("animation__attract", {
-              property: "position",
-              to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
-              dur: 2000,
-              easing: "easeOutQuad"
-            });
-
-            step = 3;
-          }
-        });
-      }
-    });
+      AFRAME.registerComponent('subtitle-houki', {
+    init: function () {
+      const houki = this.el;
+      const subtitle = document.querySelector('#houkiSubtitle');
+      const controller = document.querySelector('#rightController');
+  
+      const images = ['houki3.png', 'houki4.png'];
+      let index = 0;
+  
+      // 視線 → 1枚目
+      houki.addEventListener('raycaster-intersected', () => {
+        subtitle.setAttribute('src', images[0]);
+        subtitle.setAttribute('visible', true);
+      });
+  
+      controller.addEventListener('triggerdown', () => {
+        const hits = controller.components.raycaster.intersections;
+        if (!hits.length || hits[0].object.el !== houki) return;
+  
+        index = (index + 1) % images.length;
+        subtitle.setAttribute('src', images[index]);
+  
+        // 2 → 3 のタイミングでほうき吸引
+        if (index === 1) {
+          const ctrlPos = new THREE.Vector3();
+          controller.object3D.getWorldPosition(ctrlPos);
+  
+          houki.setAttribute("animation__attract", {
+            property: "position",
+            to: `${ctrlPos.x} ${ctrlPos.y} ${ctrlPos.z - 0.5}`,
+            dur: 2000,
+            easing: "easeOutQuad"
+          });
+        }
+      });
+    }
+  });
   </script>
 
 
   <!-- 羽字幕 -->
   <script>
     AFRAME.registerComponent('subtitle-hane', {
-      init: function () {
-        const hane = this.el;
-        const subtitle = document.querySelector('#haneSubtitle');
-        const controller = document.querySelector('#rightController');
-    
-        this.step = 0;
-        this.isRising = false;
-        this.riseStartY = 0;
-        this.riseTargetY = 0;
-    
-        /* 視線を当てたら字幕1 */
-        hane.addEventListener('raycaster-intersected', () => {
-          if (this.step === 0) {
-            subtitle.setAttribute('src', 'hane1.png');
-            subtitle.setAttribute('visible', true);
-            this.step = 1;
-          }
-        });
-    
-        /* トリガー操作 */
-        controller.addEventListener('triggerdown', () => {
-          const hits = controller.components.raycaster.intersections;
-          if (!hits.length || hits[0].object.el !== hane) return;
-    
-          // 2段階目 → 掴む前の説明
-          if (this.step === 1) {
-            subtitle.setAttribute('src', 'hane2.png');
-            this.step = 2;
-            return;
-          }
-    
-          // 3段階目 → 上昇開始
-          if (this.step === 2) {
-            subtitle.setAttribute('visible', false);
-    
-            // 物理削除
-            hane.removeAttribute("dynamic-body");
-    
-            // 上昇開始
-            this.startRise();
-    
-            // 次からも何回でも上昇できるように保持
-            this.step = 2;
-          }
-        });
-      },
-    
-      /* 上昇準備 */
-      startRise: function () {
-        this.isRising = true;
-    
-        const pos = this.el.object3D.position;
-    
-        // 今の高さから少し上まで上昇
-        this.riseStartY = pos.y;
-        this.riseTargetY = pos.y + 2.0; // ← 上昇量（好みで変えられる）
-        this.riseTime = 0;
-      },
-    
-      tick: function (time, delta) {
-        if (!this.isRising) return;
-    
-        const hane = this.el.object3D;
-    
-        // 0 → 1 へ進む割合
-        this.riseTime += delta / 2500; // ← 上昇スピード（ゆっくり）
-    
-        if (this.riseTime >= 1) {
-          this.riseTime = 1;
-          this.isRising = false; // 到達したら停止
+    init: function () {
+      const hane = this.el;
+      const subtitle = document.querySelector('#haneSubtitle');
+      const controller = document.querySelector('#rightController');
+  
+      const images = ['hane1.png', 'hane2.png'];
+      let index = 0;
+  
+      this.isRising = false;
+  
+      // 視線 → 最初の1枚目
+      hane.addEventListener('raycaster-intersected', () => {
+        subtitle.setAttribute('src', images[0]);
+        subtitle.setAttribute('visible', true);
+      });
+  
+      // トリガー → 無限ループ
+      controller.addEventListener('triggerdown', () => {
+        const hits = controller.components.raycaster.intersections;
+        if (!hits.length || hits[0].object.el !== hane) return;
+  
+        index = (index + 1) % images.length;
+        subtitle.setAttribute('src', images[index]);
+  
+        // 上昇開始（あなたの元コードそのまま）
+        if (!this.isRising) {
+          this.startRise();
         }
-    
-        // 補間（スムーズに上昇）
-        const newY =
-          THREE.MathUtils.lerp(this.riseStartY, this.riseTargetY, this.riseTime);
-    
-        hane.position.y = newY;
-      }
-    });
+      });
+    },
     </script>
 
 
@@ -444,6 +389,7 @@
 
 </body>
 </html>
+
 
 
 
