@@ -95,6 +95,7 @@
              position="-4 2 -2"
              rotation="0 0 0"
              width="4" height="2"
+             rotation="0 0 90"
              visible="false"
              material="transparent:true; shader:flat">
     </a-plane>
@@ -124,6 +125,7 @@
               class="interactable houki-target"
               gltf-model="houki1.glb"
               position="10 -3 -3"
+              rotation="0 -30 0"
               subtitle-houki
               scale="1 1 1">
     </a-entity>
@@ -190,9 +192,9 @@
               this.targetIntensity = 3.0;
               this.targetDistance = 6.0;   // ★ 周囲も照らす
               this.targetEmissive = 2.0;
-              this.targetScale = 1.0;
+              this.targetScale = 1.2;
     
-              this.targetAmbient = 1.2;    // ★ 部屋全体がふわっと明るく
+              this.targetAmbient = 2.0;    // ★ 部屋全体がふわっと明るく
     
             } else {
               this.targetIntensity = 0;
@@ -389,7 +391,7 @@
         const hane = this.el.object3D;
     
         // 0 → 1 へ進む割合
-        this.riseTime += delta / 2000; // ← 上昇スピード（ゆっくり）
+        this.riseTime += delta / 2500; // ← 上昇スピード（ゆっくり）
     
         if (this.riseTime >= 1) {
           this.riseTime = 1;
@@ -443,6 +445,7 @@
 
 </body>
 </html>
+
 
 
 
